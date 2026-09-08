@@ -1,12 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service.js';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { CoursesService } from './courses.service';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+@Controller('courses')
+export class CoursesController {
+  constructor(private readonly coursesService: CoursesService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  findAll(@Query('level') level?: string) {
+    return this.coursesService.findAll(level);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.coursesService.findOne(parseInt(id));
   }
 }
