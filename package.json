@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "test:acceptance": "npm run build && node --test test/students.e2e.cjs test/courses.e2e.cjs test/interface.e2e.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
@@ -46,6 +47,7 @@
     "supertest": "^7.0.0",
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "jsdom": "^30.0.0"
   }
 }

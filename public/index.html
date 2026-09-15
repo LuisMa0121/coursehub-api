@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#192a3e">
+  <title>Campus · Gestión de estudiantes</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23192a3e'/%3E%3Cpath d='m7 17 13-7 13 7-13 7zM12 22v7l8 4 8-4v-7' fill='none' stroke='%239bd8c5' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/panel/styles.css">
+  <link rel="stylesheet" href="/panel/responsive.css">
+  <script src="/panel/app.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="icon-cap" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5zM6 12v6l6 3 6-3v-6M22 9v7"/></symbol>
+    <symbol id="icon-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 6"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="10"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 8v8M15 8v8"/></symbol>
+    <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 7a9 9 0 1 0 1 8M20 3v5h-5"/></symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 8a3 3 0 1 1 4 3v3M12 17h.01"/></symbol>
+  </defs></svg>
+  <aside class="sidebar">
+    <a class="brand" href="/panel/" aria-label="Campus, inicio"><span class="brand-icon"><svg><use href="#icon-cap"/></svg></span><span>campus<span class="brand-dot">.</span><small>GESTIÓN ACADÉMICA</small></span></a>
+    <div class="nav-section">ESPACIO DE TRABAJO</div>
+    <a class="nav-active" href="/panel/" aria-current="page"><svg><use href="#icon-people"/></svg>Estudiantes<span class="nav-dot"></span></a>
+    <div class="sidebar-bottom"><div class="course-tag">NESTJS · SEMANA 03</div><h3>Aprender haciendo.</h3><p>Un espacio para organizar la información de tus estudiantes.</p><button class="help-link" id="help-button"><svg><use href="#icon-help"/></svg>Guía de uso<svg><use href="#icon-arrow"/></svg></button></div>
+  </aside>
+  <main>
+    <header class="topbar"><div class="breadcrumb">Campus <span>/</span> <strong>Estudiantes</strong></div><div id="connection" class="connection"><span></span>Conectando…</div></header>
+    <section class="workspace">
+      <div class="page-heading"><div><span class="eyebrow">DIRECTORIO ACADÉMICO</span><h1>Estudiantes</h1><p>Todo tu alumnado, en un solo lugar.</p></div><button id="new-student" class="button primary" disabled><svg><use href="#icon-plus"/></svg>Nuevo estudiante</button></div>
+      <div class="stats" aria-label="Resumen de estudiantes">
+        <article class="stat"><div><p>Total de estudiantes</p><strong id="total-count">—</strong><small>Registrados en el directorio</small></div><span class="stat-icon purple"><svg><use href="#icon-people"/></svg></span></article>
+        <article class="stat"><div><p>Estudiantes activos</p><strong id="active-count">—</strong><small><i class="dot green"></i>Con estado activo</small></div><span class="stat-icon mint"><svg><use href="#icon-check"/></svg></span></article>
+        <article class="stat"><div><p>Estudiantes inactivos</p><strong id="inactive-count">—</strong><small><i class="dot amber"></i>Con estado inactivo</small></div><span class="stat-icon sand"><svg><use href="#icon-pause"/></svg></span></article>
+      </div>
+      <section class="directory" aria-labelledby="directory-title">
+        <div class="directory-heading"><div><h2 id="directory-title">Directorio de estudiantes <span id="list-count" class="count-badge">0</span></h2><p>Consulta y administra cada registro.</p></div><button id="refresh" class="button quiet"><svg><use href="#icon-refresh"/></svg>Actualizar</button></div>
+        <form id="filters" class="filters">
+          <div class="search-wrap"><svg><use href="#icon-search"/></svg><label class="sr-only" for="search">Buscar por nombre o correo</label><input id="search" type="search" placeholder="Buscar por nombre o correo…" autocomplete="off"></div>
+          <div><label for="filter-career">Carrera</label><select id="filter-career" name="career"><option value="">Todas las carreras</option></select></div>
+          <div><label for="filter-semester">Semestre</label><select id="filter-semester" name="semester"><option value="">Todos</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+          <div><label for="filter-status">Estado</label><select id="filter-status" name="isActive"><option value="">Todos</option><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+          <button class="button secondary" type="submit">Aplicar filtros</button><button id="clear-filters" class="text-button" type="button">Limpiar</button>
+        </form>
+        <div id="page-error" class="error-banner" role="alert" hidden></div>
+        <div id="loading" class="empty-state"><span class="loader"></span><h3>Cargando estudiantes…</h3></div>
+        <div class="table-wrap" id="table-wrap" hidden><table><thead><tr><th>ESTUDIANTE</th><th>CARRERA</th><th>SEMESTRE</th><th>EDAD</th><th>ESTADO</th><th class="actions-heading">ACCIONES</th></tr></thead><tbody id="students-body"></tbody></table></div>
+        <div id="empty" class="empty-state" hidden><span class="empty-icon"><svg><use href="#icon-people"/></svg></span><h3 id="empty-title">Tu directorio empieza aquí</h3><p id="empty-description">Registra tu primer estudiante o explora con tres datos de ejemplo.</p><div class="empty-actions"><button id="empty-create" class="button primary">Registrar estudiante</button><button id="load-demo" class="button secondary">Cargar ejemplo</button></div></div>
+        <div class="table-footer"><span id="results-summary" aria-live="polite">Preparando directorio…</span><span>Datos en memoria <i class="dot gray"></i></span></div>
+      </section>
+      <footer class="page-footer"><span>Campus · Gestión de estudiantes</span><span>Los registros se conservan mientras el servidor esté encendido.</span></footer>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="student-dialog" aria-labelledby="form-title">
+    <form id="student-form">
+      <div class="dialog-header"><div><span class="eyebrow">DIRECTORIO ACADÉMICO</span><h2 id="form-title">Nuevo estudiante</h2></div><button type="button" class="close-button" data-close aria-label="Cerrar formulario">×</button></div>
+      <p class="dialog-intro">Completa la información del estudiante. Todos los campos son obligatorios.</p>
+      <div id="form-error" class="error-banner" role="alert" hidden></div>
+      <div class="form-grid">
+        <label class="full">Nombre completo<input name="name" id="student-name" required maxlength="150" placeholder="Ej. Ana Torres" autocomplete="name"></label>
+        <label class="full">Correo electrónico<input name="email" type="email" required placeholder="Ej. ana@institucion.edu" autocomplete="email"></label>
+        <label>Edad<input name="age" type="number" required min="0" step="1" placeholder="Ej. 21"></label>
+        <label>Semestre<select name="semester" required><option value="">Selecciona</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
+        <label class="full">Carrera<input name="career" required maxlength="150" list="careers" placeholder="Ej. Ingeniería de Software"><datalist id="careers"></datalist></label>
+        <label class="status-field full"><span><strong>Estudiante activo</strong><small>Podrás cambiar este estado en cualquier momento.</small></span><input name="isActive" type="checkbox" role="switch" checked></label>
+      </div>
+      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancelar</button><button type="submit" id="save-student" class="button primary">Registrar estudiante</button></div>
+    </form>
+  </dialog>
+  <dialog id="delete-dialog" aria-labelledby="delete-title"><div class="dialog-header"><h2 id="delete-title">Eliminar estudiante</h2><button class="close-button" data-close aria-label="Cerrar confirmación">×</button></div><p id="delete-description" class="dialog-intro"></p><div id="delete-error" class="error-banner" role="alert" hidden></div><div class="dialog-actions"><button class="button secondary" data-close>Cancelar</button><button id="confirm-delete" class="button danger">Eliminar estudiante</button></div></dialog>
+  <dialog id="details-dialog" aria-labelledby="details-title"><div class="dialog-header"><h2 id="details-title">Ficha del estudiante</h2><button class="close-button" data-close aria-label="Cerrar ficha">×</button></div><dl id="student-details" class="details-grid"></dl><div class="dialog-actions"><button class="button secondary" data-close>Cerrar</button></div></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><div class="dialog-header"><h2 id="help-title">Tu directorio, paso a paso</h2><button class="close-button" data-close aria-label="Cerrar ayuda">×</button></div><ol class="help-list"><li><strong>Registra un estudiante.</strong> Completa sus datos con un correo que no esté registrado.</li><li><strong>Encuentra lo que buscas.</strong> Combina carrera, semestre y estado, o busca por nombre y correo.</li><li><strong>Mantén la información al día.</strong> Abre la ficha, edita los datos o cambia el estado desde cada fila.</li><li><strong>Elimina cuando sea necesario.</strong> Solo se pueden eliminar estudiantes activos.</li></ol><p class="memory-note">Esta práctica guarda los datos en memoria. Al reiniciar el servidor, los registros desaparecen.</p><div class="dialog-actions"><button class="button primary" data-close>Entendido</button></div></dialog>
+</body>
+</html>

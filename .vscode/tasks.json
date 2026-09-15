@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compilar API",
+      "type": "npm",
+      "script": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Probar API e interfaz (121 escenarios)",
+      "type": "npm",
+      "script": "test:acceptance",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

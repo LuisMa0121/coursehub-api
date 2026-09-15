@@ -1,0 +1,18 @@
+/* En pantallas pequeñas, cada fila se presenta como una ficha legible. */
+@media (max-width: 1000px) {
+  .table-wrap { overflow: visible; }
+  table, tbody { display: block; width: 100%; white-space: normal; }
+  thead { display: none; }
+  tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; padding: 20px; border-top: 1px solid var(--border); }
+  tbody td { padding: 10px 0; border: 0; min-width: 0; }
+  tbody td:first-child { grid-column: 1 / -1; padding: 0 0 10px; }
+  tbody td:last-child { grid-column: 1 / -1; padding-bottom: 0; }
+  tbody td:not(:first-child):not(:last-child)::before { content: attr(data-label); display: block; font-size: 9px; letter-spacing: .6px; color: #919bad; margin-bottom: 6px; text-transform: uppercase; }
+  .student-name { font-size: 14px; }
+  .student-email { font-size: 11px; overflow-wrap: anywhere; }
+  .avatar { width: 40px; height: 40px; }
+  .career-tag { max-width: none; }
+  .row-actions { justify-content: stretch; gap: 8px; flex-wrap: wrap; }
+  .row-button { background: #f5f3fc; flex: 1; padding: 10px 6px; font-size: 11px; }
+  .row-button.delete { background: #fcf1f3; }
+}

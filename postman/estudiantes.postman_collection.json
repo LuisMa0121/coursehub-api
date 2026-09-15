@@ -1,0 +1,2345 @@
+{
+  "info": {
+    "name": "Semana 3 - Gestión de estudiantes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ejecutar en orden contra una instancia recién iniciada y vacía. Casos exitosos y errores esperados. Los datos son ficticios."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Listado inicial vacío (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), []));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Crear estudiante activo y normalizar texto (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \" Ana Torres \",\n  \"email\": \" ANA@EXAMPLE.COM \",\n  \"age\": 21,\n  \"career\": \" Software \",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":3,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Crear estudiante inactivo (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Luis Pérez\",\n  \"email\": \"luis@example.com\",\n  \"age\": 22,\n  \"career\": \"Redes\",\n  \"semester\": 4,\n  \"isActive\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Luis Pérez\",\"email\":\"luis@example.com\",\"age\":22,\"career\":\"Redes\",\"semester\":4,\"isActive\":false,\"id\":2}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Consultar todos (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Consultar estudiante por id (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":3,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Correo duplicado aunque cambien mayúsculas (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ANA@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Rechazar correo inválido (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"correo-invalido\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Rechazar semestre menor que 1 (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 0,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Rechazar semestre mayor que 10 (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 11,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Rechazar semestre decimal (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 1.5,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Rechazar edad negativa (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": -1,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Rechazar edad decimal (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 20.5,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Rechazar edad como texto (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": \"21\",\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Rechazar nombre vacío (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   \",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Rechazar carrera vacía (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \" \",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Rechazar booleano como texto (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Rechazar estado nulo (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Rechazar id enviado por el cliente (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true,\n  \"id\": 100\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Rechazar propiedad desconocida (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"nuevo@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true,\n  \"extra\": \"dato\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Rechazar cuerpo de creación vacío (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Rechazar creación sin name (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"ana@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Rechazar creación sin email (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Rechazar creación sin age (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@example.com\",\n  \"career\": \"Software\",\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24. Rechazar creación sin career (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@example.com\",\n  \"age\": 21,\n  \"semester\": 3,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25. Rechazar creación sin semester (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26. Rechazar creación sin isActive (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27. Filtrar por carrera sin distinguir mayúsculas (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?career=software"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":1}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28. Filtrar por semestre (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=4"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":2}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29. Filtrar activos (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive=true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":1}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "30. Filtrar inactivos (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive=false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":2}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "31. Combinar los tres filtros (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?career=Redes&semester=4&isActive=false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":2}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "32. Filtros combinados sin coincidencias (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?career=Software&semester=4"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), []));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "33. Rechazar filtro semester=0 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "34. Rechazar filtro semester=11 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=11"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "35. Rechazar filtro semester=abc (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "36. Rechazar filtro semester= (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "37. Rechazar filtro semester=2.5 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=2.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "38. Rechazar filtro isActive=0 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "39. Rechazar filtro isActive=FALSE (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive=FALSE"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "40. Rechazar filtro isActive= (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "41. Rechazar filtro career= (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?career="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "42. Rechazar filtro unknown=x (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?unknown=x"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "43. Rechazar filtro semester=3&semester=4 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?semester=3&semester=4"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "44. Rechazar filtro isActive=true&isActive=false (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students?isActive=true&isActive=false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "45. Rechazar id abc (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "46. Rechazar id 0 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "47. Rechazar id -1 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "48. Rechazar id 1.2 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1.2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "49. Rechazar id 1e0 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1e0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "50. Rechazar id 9007199254740993 (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/9007199254740993"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "51. Consulta inexistente (404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "52. Actualización inexistente (404)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/999",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Otro\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "53. Cambio de estado inexistente (404)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/999/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "54. Eliminación inexistente (404)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/students/999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "55. Actualizar parcialmente conservando los demás campos (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"semester\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":5,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "56. Aceptar el mismo correo del propio estudiante (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"ANA@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":1,\"email\":\"ana@example.com\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "57. Impedir correo duplicado en actualización (409)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"No debe cambiar\",\n  \"email\": \"luis@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "58. Un conflicto no modifica parcialmente el estudiante (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":5,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "59. Impedir modificar el id (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 99\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "60. Rechazar actualización con semestre inválido (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"semester\": 11\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "61. Rechazar null en PATCH: name (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "62. Rechazar null en PATCH: email (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "63. Rechazar null en PATCH: age (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"age\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "64. Rechazar null en PATCH: career (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"career\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "65. Rechazar null en PATCH: semester (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"semester\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "66. Rechazar null en PATCH: isActive (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "67. PATCH vacío conserva los datos (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":5,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "68. Ruta de estado rechaza campos adicionales (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": false,\n  \"name\": \"No debe cambiar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "69. Ruta de estado requiere isActive (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "70. Ruta de estado rechaza texto (400)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": \"false\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "71. Desactivar exclusivamente el estado (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":5,\"isActive\":false,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "72. Impedir eliminar un inactivo (409)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "73. El inactivo sigue existiendo tras el intento de eliminación (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":1,\"isActive\":false}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "74. Reactivar estudiante (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/1/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":1,\"isActive\":true}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "75. Eliminar estudiante activo (200)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":5,\"isActive\":true,\"id\":1}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "76. El estudiante eliminado ya no existe (404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "77. No se puede eliminar dos veces (404)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/students/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP estructurado', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "78. Los ids no se reutilizan al eliminar (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@example.com\",\n  \"age\": 21,\n  \"career\": \"Software\",\n  \"semester\": 1,\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"name\":\"Ana Torres\",\"email\":\"ana@example.com\",\"age\":21,\"career\":\"Software\",\"semester\":1,\"isActive\":true,\"id\":3}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "79. Semestre 10 válido (200)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/3",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"semester\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":3,\"semester\":10}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "80. Listado final (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/students"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) {",
+              "  if (expected !== null && typeof expected === \"object\") {",
+              "    for (const key of Object.keys(expected)) subset(actual[key], expected[key]);",
+              "  } else { pm.expect(actual).to.eql(expected); }",
+              "}",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":2},{\"id\":3}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(2));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

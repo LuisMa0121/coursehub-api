@@ -16,7 +16,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('devuelve el mensaje de bienvenida de CourseHub', () => {
-      expect(appController.getHello()).toBe('Bienvenido a CourseHub API');
+      expect(appController.getHello()).toBe('CourseHub API está en línea');
     });
   });
 });

@@ -1,0 +1,862 @@
+[
+  {
+    "name": "Listado inicial vacío",
+    "method": "GET",
+    "route": "/students",
+    "status": 200,
+    "expected": [],
+    "length": 0
+  },
+  {
+    "name": "Crear estudiante activo y normalizar texto",
+    "method": "POST",
+    "route": "/students",
+    "status": 201,
+    "body": {
+      "name": " Ana Torres ",
+      "email": " ANA@EXAMPLE.COM ",
+      "age": 21,
+      "career": " Software ",
+      "semester": 3,
+      "isActive": true
+    },
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "Crear estudiante inactivo",
+    "method": "POST",
+    "route": "/students",
+    "status": 201,
+    "body": {
+      "name": "Luis Pérez",
+      "email": "luis@example.com",
+      "age": 22,
+      "career": "Redes",
+      "semester": 4,
+      "isActive": false
+    },
+    "expected": {
+      "name": "Luis Pérez",
+      "email": "luis@example.com",
+      "age": 22,
+      "career": "Redes",
+      "semester": 4,
+      "isActive": false,
+      "id": 2
+    }
+  },
+  {
+    "name": "Consultar todos",
+    "method": "GET",
+    "route": "/students",
+    "status": 200,
+    "length": 2
+  },
+  {
+    "name": "Consultar estudiante por id",
+    "method": "GET",
+    "route": "/students/1",
+    "status": 200,
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "Correo duplicado aunque cambien mayúsculas",
+    "method": "POST",
+    "route": "/students",
+    "status": 409,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ANA@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar correo inválido",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "correo-invalido",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar semestre menor que 1",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 0,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar semestre mayor que 10",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 11,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar semestre decimal",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 1.5,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar edad negativa",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": -1,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar edad decimal",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 20.5,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar edad como texto",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": "21",
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar nombre vacío",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "   ",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar carrera vacía",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": " ",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar booleano como texto",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": "false"
+    }
+  },
+  {
+    "name": "Rechazar estado nulo",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": null
+    }
+  },
+  {
+    "name": "Rechazar id enviado por el cliente",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true,
+      "id": 100
+    }
+  },
+  {
+    "name": "Rechazar propiedad desconocida",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "nuevo@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true,
+      "extra": "dato"
+    }
+  },
+  {
+    "name": "Rechazar cuerpo de creación vacío",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {}
+  },
+  {
+    "name": "Rechazar creación sin name",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar creación sin email",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "age": 21,
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar creación sin age",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "career": "Software",
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar creación sin career",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "semester": 3,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar creación sin semester",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "isActive": true
+    }
+  },
+  {
+    "name": "Rechazar creación sin isActive",
+    "method": "POST",
+    "route": "/students",
+    "status": 400,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 3
+    }
+  },
+  {
+    "name": "Filtrar por carrera sin distinguir mayúsculas",
+    "method": "GET",
+    "route": "/students?career=software",
+    "status": 200,
+    "expected": [
+      {
+        "id": 1
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Filtrar por semestre",
+    "method": "GET",
+    "route": "/students?semester=4",
+    "status": 200,
+    "expected": [
+      {
+        "id": 2
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Filtrar activos",
+    "method": "GET",
+    "route": "/students?isActive=true",
+    "status": 200,
+    "expected": [
+      {
+        "id": 1
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Filtrar inactivos",
+    "method": "GET",
+    "route": "/students?isActive=false",
+    "status": 200,
+    "expected": [
+      {
+        "id": 2
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Combinar los tres filtros",
+    "method": "GET",
+    "route": "/students?career=Redes&semester=4&isActive=false",
+    "status": 200,
+    "expected": [
+      {
+        "id": 2
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Filtros combinados sin coincidencias",
+    "method": "GET",
+    "route": "/students?career=Software&semester=4",
+    "status": 200,
+    "expected": [],
+    "length": 0
+  },
+  {
+    "name": "Rechazar filtro semester=0",
+    "method": "GET",
+    "route": "/students?semester=0",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro semester=11",
+    "method": "GET",
+    "route": "/students?semester=11",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro semester=abc",
+    "method": "GET",
+    "route": "/students?semester=abc",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro semester=",
+    "method": "GET",
+    "route": "/students?semester=",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro semester=2.5",
+    "method": "GET",
+    "route": "/students?semester=2.5",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro isActive=0",
+    "method": "GET",
+    "route": "/students?isActive=0",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro isActive=FALSE",
+    "method": "GET",
+    "route": "/students?isActive=FALSE",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro isActive=",
+    "method": "GET",
+    "route": "/students?isActive=",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro career=",
+    "method": "GET",
+    "route": "/students?career=",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro unknown=x",
+    "method": "GET",
+    "route": "/students?unknown=x",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro semester=3&semester=4",
+    "method": "GET",
+    "route": "/students?semester=3&semester=4",
+    "status": 400
+  },
+  {
+    "name": "Rechazar filtro isActive=true&isActive=false",
+    "method": "GET",
+    "route": "/students?isActive=true&isActive=false",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id abc",
+    "method": "GET",
+    "route": "/students/abc",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id 0",
+    "method": "GET",
+    "route": "/students/0",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id -1",
+    "method": "GET",
+    "route": "/students/-1",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id 1.2",
+    "method": "GET",
+    "route": "/students/1.2",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id 1e0",
+    "method": "GET",
+    "route": "/students/1e0",
+    "status": 400
+  },
+  {
+    "name": "Rechazar id 9007199254740993",
+    "method": "GET",
+    "route": "/students/9007199254740993",
+    "status": 400
+  },
+  {
+    "name": "Consulta inexistente",
+    "method": "GET",
+    "route": "/students/999",
+    "status": 404
+  },
+  {
+    "name": "Actualización inexistente",
+    "method": "PATCH",
+    "route": "/students/999",
+    "status": 404,
+    "body": {
+      "name": "Otro"
+    }
+  },
+  {
+    "name": "Cambio de estado inexistente",
+    "method": "PATCH",
+    "route": "/students/999/status",
+    "status": 404,
+    "body": {
+      "isActive": false
+    }
+  },
+  {
+    "name": "Eliminación inexistente",
+    "method": "DELETE",
+    "route": "/students/999",
+    "status": 404
+  },
+  {
+    "name": "Actualizar parcialmente conservando los demás campos",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 200,
+    "body": {
+      "semester": 5
+    },
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 5,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "Aceptar el mismo correo del propio estudiante",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 200,
+    "body": {
+      "email": "ANA@example.com"
+    },
+    "expected": {
+      "id": 1,
+      "email": "ana@example.com"
+    }
+  },
+  {
+    "name": "Impedir correo duplicado en actualización",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 409,
+    "body": {
+      "name": "No debe cambiar",
+      "email": "luis@example.com"
+    }
+  },
+  {
+    "name": "Un conflicto no modifica parcialmente el estudiante",
+    "method": "GET",
+    "route": "/students/1",
+    "status": 200,
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 5,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "Impedir modificar el id",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "id": 99
+    }
+  },
+  {
+    "name": "Rechazar actualización con semestre inválido",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "semester": 11
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: name",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "name": null
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: email",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "email": null
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: age",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "age": null
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: career",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "career": null
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: semester",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "semester": null
+    }
+  },
+  {
+    "name": "Rechazar null en PATCH: isActive",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 400,
+    "body": {
+      "isActive": null
+    }
+  },
+  {
+    "name": "PATCH vacío conserva los datos",
+    "method": "PATCH",
+    "route": "/students/1",
+    "status": 200,
+    "body": {},
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 5,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "Ruta de estado rechaza campos adicionales",
+    "method": "PATCH",
+    "route": "/students/1/status",
+    "status": 400,
+    "body": {
+      "isActive": false,
+      "name": "No debe cambiar"
+    }
+  },
+  {
+    "name": "Ruta de estado requiere isActive",
+    "method": "PATCH",
+    "route": "/students/1/status",
+    "status": 400,
+    "body": {}
+  },
+  {
+    "name": "Ruta de estado rechaza texto",
+    "method": "PATCH",
+    "route": "/students/1/status",
+    "status": 400,
+    "body": {
+      "isActive": "false"
+    }
+  },
+  {
+    "name": "Desactivar exclusivamente el estado",
+    "method": "PATCH",
+    "route": "/students/1/status",
+    "status": 200,
+    "body": {
+      "isActive": false
+    },
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 5,
+      "isActive": false,
+      "id": 1
+    }
+  },
+  {
+    "name": "Impedir eliminar un inactivo",
+    "method": "DELETE",
+    "route": "/students/1",
+    "status": 409
+  },
+  {
+    "name": "El inactivo sigue existiendo tras el intento de eliminación",
+    "method": "GET",
+    "route": "/students/1",
+    "status": 200,
+    "expected": {
+      "id": 1,
+      "isActive": false
+    }
+  },
+  {
+    "name": "Reactivar estudiante",
+    "method": "PATCH",
+    "route": "/students/1/status",
+    "status": 200,
+    "body": {
+      "isActive": true
+    },
+    "expected": {
+      "id": 1,
+      "isActive": true
+    }
+  },
+  {
+    "name": "Eliminar estudiante activo",
+    "method": "DELETE",
+    "route": "/students/1",
+    "status": 200,
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 5,
+      "isActive": true,
+      "id": 1
+    }
+  },
+  {
+    "name": "El estudiante eliminado ya no existe",
+    "method": "GET",
+    "route": "/students/1",
+    "status": 404
+  },
+  {
+    "name": "No se puede eliminar dos veces",
+    "method": "DELETE",
+    "route": "/students/1",
+    "status": 404
+  },
+  {
+    "name": "Los ids no se reutilizan al eliminar",
+    "method": "POST",
+    "route": "/students",
+    "status": 201,
+    "body": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 1,
+      "isActive": true
+    },
+    "expected": {
+      "name": "Ana Torres",
+      "email": "ana@example.com",
+      "age": 21,
+      "career": "Software",
+      "semester": 1,
+      "isActive": true,
+      "id": 3
+    }
+  },
+  {
+    "name": "Semestre 10 válido",
+    "method": "PATCH",
+    "route": "/students/3",
+    "status": 200,
+    "body": {
+      "semester": 10
+    },
+    "expected": {
+      "id": 3,
+      "semester": 10
+    }
+  },
+  {
+    "name": "Listado final",
+    "method": "GET",
+    "route": "/students",
+    "status": 200,
+    "expected": [
+      {
+        "id": 2
+      },
+      {
+        "id": 3
+      }
+    ],
+    "length": 2
+  }
+]

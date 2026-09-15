@@ -1,0 +1,769 @@
+{
+  "info": {
+    "name": "CourseHub API - Sesiones 1 a 6",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ejecutar en orden, una iteración, contra un servidor recién iniciado con los tres cursos iniciales."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Respuesta raíz de la sesión 1 (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Mensaje de bienvenida', () => pm.expect(pm.response.text()).to.eql(\"CourseHub API está en línea\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Bienvenida de la sesión 2 (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/welcome",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"message\":\"Bienvenido a CourseHub API\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Tres cursos iniciales de la sesión 3 (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":1,\"title\":\"NestJS Fundamentals\",\"level\":\"beginner\"},{\"id\":2,\"title\":\"REST APIs with NestJS\",\"level\":\"beginner\"},{\"id\":3,\"title\":\"NestJS Architecture\",\"level\":\"intermediate\"}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(3));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Consultar el segundo curso (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses/2",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":2,\"title\":\"REST APIs with NestJS\",\"level\":\"beginner\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Filtrar cursos beginner (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses?level=beginner",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":1},{\"id\":2}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Filtrar cursos intermediate (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses?level=intermediate",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), [{\"id\":3}]));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Filtro sin coincidencias (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses?level=advanced",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), []));",
+              "pm.test('Cantidad esperada', () => pm.expect(pm.response.json()).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Crear curso con DTO (201)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Testing NestJS\",\n  \"level\": \"intermediate\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":4,\"title\":\"Testing NestJS\",\"level\":\"intermediate\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Rechazar título vacío (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"\",\n  \"level\": \"beginner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Rechazar nivel inválido (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Prueba\",\n  \"level\": \"expert\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Rechazar título numérico (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": 42,\n  \"level\": \"beginner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Rechazar cuerpo vacío (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Rechazar propiedad extra (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Prueba\",\n  \"level\": \"beginner\",\n  \"duration\": 20\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Cambiar solo el título (200)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/4",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Testing APIs with NestJS\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":4,\"title\":\"Testing APIs with NestJS\",\"level\":\"intermediate\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Cambiar solo el nivel (200)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/4",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"level\": \"advanced\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":4,\"title\":\"Testing APIs with NestJS\",\"level\":\"advanced\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Rechazar nivel inválido al actualizar (400)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/4",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"level\": \"expert\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Rechazar cambio de identificador (400)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/4",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 100\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Rechazar título nulo (400)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/4",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Error de validación conserva el curso (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses/4",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":4,\"title\":\"Testing APIs with NestJS\",\"level\":\"advanced\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Consultar curso inexistente (404)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses/999",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Actualizar curso inexistente (404)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/999",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Otro\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Eliminar curso inexistente (404)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/courses/999",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Eliminar curso existente (200)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/courses/4",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":4,\"title\":\"Testing APIs with NestJS\",\"level\":\"advanced\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24. Consultar tras eliminar (404)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/courses/4",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25. Eliminar por segunda vez (404)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/courses/4",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error HTTP', () => pm.expect(pm.response.json().statusCode).to.eql(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26. Contador no reutiliza id eliminado (201)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/courses",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Diseño de APIs\",\n  \"level\": \"beginner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":5,\"title\":\"Diseño de APIs\",\"level\":\"beginner\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27. Actualizar parcialmente con objeto vacío (200)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/courses/5",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "function subset(actual, expected) { if (expected !== null && typeof expected === \"object\") { for (const key of Object.keys(expected)) subset(actual[key], expected[key]); } else { pm.expect(actual).to.eql(expected); } }",
+              "pm.test('Contenido esperado', () => subset(pm.response.json(), {\"id\":5,\"title\":\"Diseño de APIs\",\"level\":\"beginner\"}));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

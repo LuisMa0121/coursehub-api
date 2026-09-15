@@ -1,0 +1,288 @@
+[
+  {
+    "name": "Respuesta raíz de la sesión 1",
+    "method": "GET",
+    "route": "/",
+    "status": 200,
+    "expected": "CourseHub API está en línea"
+  },
+  {
+    "name": "Bienvenida de la sesión 2",
+    "method": "GET",
+    "route": "/welcome",
+    "status": 200,
+    "expected": {
+      "message": "Bienvenido a CourseHub API"
+    }
+  },
+  {
+    "name": "Tres cursos iniciales de la sesión 3",
+    "method": "GET",
+    "route": "/courses",
+    "status": 200,
+    "expected": [
+      {
+        "id": 1,
+        "title": "NestJS Fundamentals",
+        "level": "beginner"
+      },
+      {
+        "id": 2,
+        "title": "REST APIs with NestJS",
+        "level": "beginner"
+      },
+      {
+        "id": 3,
+        "title": "NestJS Architecture",
+        "level": "intermediate"
+      }
+    ],
+    "length": 3
+  },
+  {
+    "name": "Consultar el segundo curso",
+    "method": "GET",
+    "route": "/courses/2",
+    "status": 200,
+    "expected": {
+      "id": 2,
+      "title": "REST APIs with NestJS",
+      "level": "beginner"
+    }
+  },
+  {
+    "name": "Filtrar cursos beginner",
+    "method": "GET",
+    "route": "/courses?level=beginner",
+    "status": 200,
+    "expected": [
+      {
+        "id": 1
+      },
+      {
+        "id": 2
+      }
+    ],
+    "length": 2
+  },
+  {
+    "name": "Filtrar cursos intermediate",
+    "method": "GET",
+    "route": "/courses?level=intermediate",
+    "status": 200,
+    "expected": [
+      {
+        "id": 3
+      }
+    ],
+    "length": 1
+  },
+  {
+    "name": "Filtro sin coincidencias",
+    "method": "GET",
+    "route": "/courses?level=advanced",
+    "status": 200,
+    "expected": [],
+    "length": 0
+  },
+  {
+    "name": "Crear curso con DTO",
+    "method": "POST",
+    "route": "/courses",
+    "status": 201,
+    "body": {
+      "title": "Testing NestJS",
+      "level": "intermediate"
+    },
+    "expected": {
+      "id": 4,
+      "title": "Testing NestJS",
+      "level": "intermediate"
+    }
+  },
+  {
+    "name": "Rechazar título vacío",
+    "method": "POST",
+    "route": "/courses",
+    "status": 400,
+    "body": {
+      "title": "",
+      "level": "beginner"
+    }
+  },
+  {
+    "name": "Rechazar nivel inválido",
+    "method": "POST",
+    "route": "/courses",
+    "status": 400,
+    "body": {
+      "title": "Prueba",
+      "level": "expert"
+    }
+  },
+  {
+    "name": "Rechazar título numérico",
+    "method": "POST",
+    "route": "/courses",
+    "status": 400,
+    "body": {
+      "title": 42,
+      "level": "beginner"
+    }
+  },
+  {
+    "name": "Rechazar cuerpo vacío",
+    "method": "POST",
+    "route": "/courses",
+    "status": 400,
+    "body": {}
+  },
+  {
+    "name": "Rechazar propiedad extra",
+    "method": "POST",
+    "route": "/courses",
+    "status": 400,
+    "body": {
+      "title": "Prueba",
+      "level": "beginner",
+      "duration": 20
+    }
+  },
+  {
+    "name": "Cambiar solo el título",
+    "method": "PATCH",
+    "route": "/courses/4",
+    "status": 200,
+    "body": {
+      "title": "Testing APIs with NestJS"
+    },
+    "expected": {
+      "id": 4,
+      "title": "Testing APIs with NestJS",
+      "level": "intermediate"
+    }
+  },
+  {
+    "name": "Cambiar solo el nivel",
+    "method": "PATCH",
+    "route": "/courses/4",
+    "status": 200,
+    "body": {
+      "level": "advanced"
+    },
+    "expected": {
+      "id": 4,
+      "title": "Testing APIs with NestJS",
+      "level": "advanced"
+    }
+  },
+  {
+    "name": "Rechazar nivel inválido al actualizar",
+    "method": "PATCH",
+    "route": "/courses/4",
+    "status": 400,
+    "body": {
+      "level": "expert"
+    }
+  },
+  {
+    "name": "Rechazar cambio de identificador",
+    "method": "PATCH",
+    "route": "/courses/4",
+    "status": 400,
+    "body": {
+      "id": 100
+    }
+  },
+  {
+    "name": "Rechazar título nulo",
+    "method": "PATCH",
+    "route": "/courses/4",
+    "status": 400,
+    "body": {
+      "title": null
+    }
+  },
+  {
+    "name": "Error de validación conserva el curso",
+    "method": "GET",
+    "route": "/courses/4",
+    "status": 200,
+    "expected": {
+      "id": 4,
+      "title": "Testing APIs with NestJS",
+      "level": "advanced"
+    }
+  },
+  {
+    "name": "Consultar curso inexistente",
+    "method": "GET",
+    "route": "/courses/999",
+    "status": 404
+  },
+  {
+    "name": "Actualizar curso inexistente",
+    "method": "PATCH",
+    "route": "/courses/999",
+    "status": 404,
+    "body": {
+      "title": "Otro"
+    }
+  },
+  {
+    "name": "Eliminar curso inexistente",
+    "method": "DELETE",
+    "route": "/courses/999",
+    "status": 404
+  },
+  {
+    "name": "Eliminar curso existente",
+    "method": "DELETE",
+    "route": "/courses/4",
+    "status": 200,
+    "expected": {
+      "id": 4,
+      "title": "Testing APIs with NestJS",
+      "level": "advanced"
+    }
+  },
+  {
+    "name": "Consultar tras eliminar",
+    "method": "GET",
+    "route": "/courses/4",
+    "status": 404
+  },
+  {
+    "name": "Eliminar por segunda vez",
+    "method": "DELETE",
+    "route": "/courses/4",
+    "status": 404
+  },
+  {
+    "name": "Contador no reutiliza id eliminado",
+    "method": "POST",
+    "route": "/courses",
+    "status": 201,
+    "body": {
+      "title": "Diseño de APIs",
+      "level": "beginner"
+    },
+    "expected": {
+      "id": 5,
+      "title": "Diseño de APIs",
+      "level": "beginner"
+    }
+  },
+  {
+    "name": "Actualizar parcialmente con objeto vacío",
+    "method": "PATCH",
+    "route": "/courses/5",
+    "status": 200,
+    "body": {},
+    "expected": {
+      "id": 5,
+      "title": "Diseño de APIs",
+      "level": "beginner"
+    }
+  }
+]

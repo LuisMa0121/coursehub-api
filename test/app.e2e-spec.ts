@@ -36,7 +36,7 @@ describe('CourseHub API (HTTP)', () => {
     await request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Bienvenido a CourseHub API');
+      .expect('CourseHub API está en línea');
     await request(app.getHttpServer())
       .get('/welcome')
       .expect(200)
