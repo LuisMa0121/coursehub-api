@@ -1,0 +1,124 @@
+@baseUrl = http://localhost:3000
+
+### Semana 1: mensaje de estado (200)
+GET {{baseUrl}}/
+
+### Semana 1: bienvenida JSON (200)
+GET {{baseUrl}}/welcome
+
+### Listar los tres cursos iniciales (200). Reiniciar antes del recorrido.
+GET {{baseUrl}}/courses
+
+### Filtrar por nivel (200, cursos 1 y 2)
+GET {{baseUrl}}/courses?level=beginner
+
+### Consultar un curso (200)
+GET {{baseUrl}}/courses/1
+
+### Sesión 5: crear un curso (201, id 4 después de reiniciar)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"title":"Diseño de APIs","level":"intermediate"}
+
+### Comprobar el curso creado (200)
+GET {{baseUrl}}/courses/4
+
+### Título vacío (400)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"title":"","level":"beginner"}
+
+### Nivel no permitido (400)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"title":"Diseño de APIs","level":"expert"}
+
+### Título ausente (400)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"level":"beginner"}
+
+### Título numérico (400)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"title":42,"level":"beginner"}
+
+### Propiedad no declarada (400)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+
+{"title":"Diseño de APIs","level":"beginner","duration":20}
+
+### Sesión 6: anotar título y nivel iniciales (200)
+GET {{baseUrl}}/courses/1
+
+### Actualizar solo el nivel (200, conserva el título)
+PATCH {{baseUrl}}/courses/1
+Content-Type: application/json
+
+{"level":"advanced"}
+
+### Actualización inválida (400, conserva advanced)
+PATCH {{baseUrl}}/courses/1
+Content-Type: application/json
+
+{"level":"expert"}
+
+### Confirmar que la actualización inválida no cambió los datos (200)
+GET {{baseUrl}}/courses/1
+
+### Rechazar un campo extra al actualizar (400)
+PATCH {{baseUrl}}/courses/1
+Content-Type: application/json
+
+{"id":99}
+
+### Rechazar null enviado explícitamente (400)
+PATCH {{baseUrl}}/courses/1
+Content-Type: application/json
+
+{"title":null}
+
+### Actualizar un id inexistente con cuerpo válido (404)
+PATCH {{baseUrl}}/courses/999
+Content-Type: application/json
+
+{"level":"advanced"}
+
+### Eliminar el curso 1 (200, devuelve el objeto eliminado)
+DELETE {{baseUrl}}/courses/1
+
+### Consultarlo después de eliminarlo (404)
+GET {{baseUrl}}/courses/1
+
+### Segunda eliminación (404)
+DELETE {{baseUrl}}/courses/1
+
+### Consultar un id inexistente (404)
+GET {{baseUrl}}/courses/999
+
+### Eliminar un id inexistente (404)
+DELETE {{baseUrl}}/courses/999
+
+### Completar el ciclo del curso creado: modificar solo el título (200)
+PATCH {{baseUrl}}/courses/4
+Content-Type: application/json
+
+{"title":"Testing APIs with NestJS"}
+
+### Consultar el cambio (200)
+GET {{baseUrl}}/courses/4
+
+### Eliminar el curso creado (200)
+DELETE {{baseUrl}}/courses/4
+
+### Confirmar ausencia (404)
+GET {{baseUrl}}/courses/4
+
+### Al reiniciar deben volver exactamente los tres cursos iniciales (200)
+GET {{baseUrl}}/courses
