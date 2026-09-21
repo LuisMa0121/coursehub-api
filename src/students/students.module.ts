@@ -5,6 +5,7 @@ import { PositiveIdPipe } from './pipes/positive-id.pipe.js';
 
 @Module({
   controllers: [StudentsController],
+  exports: [StudentsService],
   providers: [StudentsService, PositiveIdPipe],
 })
 export class StudentsModule {}
