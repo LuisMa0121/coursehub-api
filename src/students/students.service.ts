@@ -7,7 +7,16 @@ import { CreateStudentDto } from './dto/create-student.dto.js';
 import { FilterStudentsDto } from './dto/filter-students.dto.js';
 import { UpdateStudentDto } from './dto/update-student.dto.js';
 import { UpdateStudentStatusDto } from './dto/update-student-status.dto.js';
-import type { Student } from './entities/student.entity.js';
+type Student = {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+  career: string;
+  semester: number;
+  isActive: boolean;
+}
+
 
 @Injectable()
 export class StudentsService {
