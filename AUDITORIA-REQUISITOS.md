@@ -23,7 +23,7 @@ La demostración ante el docente debe realizarla el estudiante o equipo. Se entr
 | `semester` | Cumple | Semestre entero de 1 a 10 |
 | `isActive` | Cumple | Estado booleano |
 
-Archivos principales: `src/students/entities/student.entity.ts` y `src/students/dto/create-student.dto.ts`.
+Archivos principales: `tipo Student local en src/students/students.service.ts` y `src/students/dto/create-student.dto.ts`.
 
 ## 2. Operaciones solicitadas
 
@@ -60,7 +60,7 @@ Archivos principales: `students.controller.ts`, `students.service.ts` y `dto/fil
 | Sin base de datos | Cumple | No hay ORM ni conexión a base de datos |
 | Almacenamiento en memoria | Cumple | Arreglo privado en `StudentsService`; se vacía al reiniciar |
 | Controllers sin lógica de negocio | Cumple | Los métodos del controlador delegan al servicio |
-| Organización por responsabilidades | Cumple | Módulo, controlador, servicio, DTOs, entidad y Pipe separados |
+| Organización por responsabilidades | Cumple | Módulo, controlador, servicio, DTOs, tipo local y Pipe separados |
 | Conceptos de NestJS hasta Semana 3 | Compatible en el módulo | El núcleo usa módulos, inyección, rutas, DTOs, Pipes y excepciones; no se añadió persistencia ni autenticación |
 | Usar como base el proyecto del curso | Cumple | Integrado en el repositorio original, conservando cursos y bienvenida |
 | Demostrar éxitos y errores con cliente HTTP | Preparado y probado | Colección Postman ejecutada con Newman: 80 solicitudes y 168 comprobaciones, sin fallos; el equipo debe presentarla en clase |

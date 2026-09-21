@@ -33,7 +33,7 @@ Respuesta JSON con código HTTP
 
 ## Orden sugerido para estudiar el código
 
-1. **student.entity.ts**: identifica los siete campos del estudiante. `id` pertenece al resultado, pero no al DTO de creación.
+1. **tipo Student en students.service.ts**: identifica los siete campos del estudiante. `id` pertenece al resultado, pero no al DTO de creación.
 2. **create-student.dto.ts**: revisa los decoradores. TypeScript ayuda al programar; `class-validator` comprueba los datos que llegan realmente por HTTP.
 3. **setup-app.ts**: entiende dónde se activa esa validación y por qué se rechaza una propiedad desconocida.
 4. **students.service.ts**: estudia `create`, `findAll`, `findOne`, `update`, `updateStatus` y `remove`. Aquí están las decisiones de negocio.

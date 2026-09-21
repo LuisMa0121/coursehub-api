@@ -15,8 +15,7 @@ type Student = {
   career: string;
   semester: number;
   isActive: boolean;
-}
-
+};
 
 @Injectable()
 export class StudentsService {

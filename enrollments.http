@@ -1,0 +1,118 @@
+# Instancia nueva, sin datos previos. Ejecutar en orden.
+@baseUrl = http://127.0.0.1:3000
+
+### Crear estudiante activo
+POST {{baseUrl}}/students
+Content-Type: application/json
+
+{
+  "name": "Ana Prueba",
+  "email": "ana@example.com",
+  "age": 20,
+  "career": "Software",
+  "semester": 5,
+  "isActive": true
+}
+
+### Crear estudiante inactivo
+POST {{baseUrl}}/students
+Content-Type: application/json
+
+{
+  "name": "Luis Prueba",
+  "email": "inactivo@example.com",
+  "age": 21,
+  "career": "Software",
+  "semester": 5,
+  "isActive": false
+}
+
+### Matrícula válida: 201
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "courseId": 1
+}
+
+### Duplicada: 409
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "courseId": 1
+}
+
+### Inactivo: 409
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 2,
+  "courseId": 1
+}
+
+### Estudiante inexistente: 404
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 999,
+  "courseId": 1
+}
+
+### Curso inexistente: 404
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "courseId": 999
+}
+
+### DTO inválido: 400
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": "1",
+  "courseId": 1
+}
+
+### Lista: 200
+GET {{baseUrl}}/enrollments
+
+### Filtro estudiante
+GET {{baseUrl}}/enrollments?studentId=1
+
+### Filtro curso
+GET {{baseUrl}}/enrollments?courseId=1
+
+### Ambos filtros
+GET {{baseUrl}}/enrollments?studentId=1&courseId=1
+
+### Por estudiante
+GET {{baseUrl}}/students/1/enrollments
+
+### Por curso
+GET {{baseUrl}}/courses/1/enrollments
+
+### Cancelar: 200
+DELETE {{baseUrl}}/enrollments/1
+
+### Lista vacía
+GET {{baseUrl}}/enrollments
+
+### Ya cancelada: 404
+DELETE {{baseUrl}}/enrollments/1
+
+### Nueva matrícula id 2
+POST {{baseUrl}}/enrollments
+Content-Type: application/json
+
+{
+  "studentId": 1,
+  "courseId": 1
+}

@@ -1,3 +1,4 @@
+import { EnrollmentsModule } from './enrollments/enrollments.module.js';
 import { StudentsModule } from './students/students.module.js';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
@@ -7,7 +8,7 @@ import { WelcomeController } from './welcome.controller.js';
 import { WelcomeService } from './welcome.service.js';
 
 @Module({
-  imports: [CoursesModule, StudentsModule],
+  imports: [CoursesModule, StudentsModule, EnrollmentsModule],
   controllers: [AppController, WelcomeController],
   providers: [AppService, WelcomeService],
 })
