@@ -1,48 +1,165 @@
-# CourseHub
+# Library API — CourseHub
 
-Trabajo práctico para gestionar cursos, estudiantes y matrículas. Los datos se guardan en memoria y se pierden al reiniciar.
+API REST para la **gestión de una biblioteca**: libros, cursos, estudiantes y matrículas.
 
-## Cómo usarlo
+Desarrollada con **NestJS**, **TypeORM** y **PostgreSQL**.
 
-Ejecuta `npm ci` y `npm run start:dev`. La API abre en el puerto 3000 y la pantalla de estudiantes en `/panel/`. Con F5 en Visual Studio Code se usa el puerto 3001.
+## Integrantes
 
-## Rutas
+1. _______________________________________________
 
-| Método | Ruta | Para qué sirve |
-| --- | --- | --- |
-| GET | `/`, `/welcome` | Bienvenida |
-| GET / POST | `/courses` | Consultar o crear cursos |
-| GET / PATCH / DELETE | `/courses/:id` | Consultar, editar o eliminar un curso |
-| GET / POST | `/students` | Consultar o registrar estudiantes |
-| GET / PATCH / DELETE | `/students/:id` | Consultar, editar o eliminar un estudiante |
-| PATCH | `/students/:id/status` | Activar o desactivar |
-| POST | `/enrollments` | Matricular |
-| GET | `/enrollments` | Consultar; permite combinar `studentId` y `courseId` |
-| GET | `/students/:studentId/enrollments` | Matrículas de un estudiante |
-| GET | `/courses/:courseId/enrollments` | Matrículas de un curso |
-| DELETE | `/enrollments/:id` | Cancelar una matrícula |
+## Descripción del proyecto
 
-## Ejemplo para la evaluación
+La API permite administrar el catálogo de libros de una biblioteca. Los datos se persisten en PostgreSQL y se conservan al reiniciar el servidor.
 
-En una sesión nueva, crea un estudiante con `POST /students`:
+### Entidades previstas
 
-```json
-{"name":"Ana","email":"ana@example.com","age":20,"career":"Software","semester":5,"isActive":true}
+```
+┌──────────────┐       ┌──────────────┐
+│    Book      │       │   Student    │
+│──────────────│       │──────────────│
+│ id           │       │ id           │
+│ title        │       │ name         │
+│ author       │       │ email        │
+│ isbn         │       │ age          │
+│ year         │       │ career       │
+│ genre        │       │ semester     │
+│ availableCop │       │ isActive     │
+└──────────────┘       └──────────────┘
+
+┌──────────────┐       ┌──────────────┐
+│   Course     │       │  Enrollment  │
+│──────────────│       │──────────────│
+│ id           │◄──────│ id           │
+│ title        │       │ studentId    │
+│ level        │       │ courseId     │
+└──────────────┘       └──────────────┘
 ```
 
-Recibirás sus datos con `id: 1`. Crea otro con correo distinto e `isActive: false`; tendrá `id: 2`. El curso 1 ya viene creado.
+## Cómo ejecutar
 
-| Caso | Petición | Respuesta esperada |
-| --- | --- | --- |
-| Matrícula válida | `POST /enrollments` con `{"studentId":1,"courseId":1}` | 201: `{"id":1,"studentId":1,"courseId":1}` |
-| Duplicada | Repetir la petición anterior | 409: “El estudiante ya está matriculado en ese curso” |
-| Estudiante inactivo | `POST /enrollments` con `{"studentId":2,"courseId":1}` | 409: “No se puede matricular a un estudiante inactivo” |
-| Estudiante inexistente | `POST /enrollments` con `{"studentId":999,"courseId":1}` | 404 |
-| Curso inexistente | `POST /enrollments` con `{"studentId":1,"courseId":999}` | 404 |
-| Filtrar | `GET /enrollments?studentId=1&courseId=1` | 200: `[{"id":1,"studentId":1,"courseId":1}]` |
-| Cancelar | `DELETE /enrollments/1` | 200: `{"id":1,"studentId":1,"courseId":1}` |
-| Comprobar cancelación | `GET /enrollments` | 200: `[]` |
+### 1. Requisitos previos
 
-Las pruebas se ejecutan con `npm run test:e2e`. Pasaron los 35 casos de matrículas y las pruebas anteriores.
+- Node.js ≥ 18
+- PostgreSQL en ejecución local
+- Git
 
-El merge está en el commit `5ba3440`. Como estudiantes ya estaba en `main`, se creó la rama `integracion-estudiantes` para adaptar el módulo y unirlo sin perder lo anterior.
+### 2. Instalar dependencias
+
+```bash
+npm ci
+```
+
+### 3. Configurar variables de entorno
+
+Copia el archivo de ejemplo y ajusta los valores:
+
+```bash
+cp .env.example .env
+```
+
+Edita `.env` con los datos de tu base de datos PostgreSQL:
+
+```env
+PORT=3000
+NODE_ENV=development
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=tu_contraseña
+DB_NAME=library
+```
+
+> **Nota:** Debes crear la base de datos `library` en PostgreSQL antes de iniciar:
+> ```sql
+> CREATE DATABASE library;
+> ```
+
+### 4. Iniciar en modo desarrollo
+
+```bash
+npm run start:dev
+```
+
+La API quedará disponible en `http://localhost:3000`.  
+El panel de estudiantes en `http://localhost:3000/panel/`.
+
+---
+
+## Endpoints
+
+### Libros (`/books`) — Recurso principal con persistencia PostgreSQL
+
+| Método | Ruta | Descripción | Cuerpo |
+|---|---|---|---|
+| `GET` | `/books` | Listar todos los libros | — |
+| `GET` | `/books/:id` | Obtener un libro por id | — |
+| `POST` | `/books` | Crear un libro | JSON |
+| `PATCH` | `/books/:id` | Actualizar parcialmente | JSON |
+| `DELETE` | `/books/:id` | Eliminar un libro | — |
+
+**Cuerpo de creación (`POST /books`):**
+
+```json
+{
+  "title": "El Quijote",
+  "author": "Miguel de Cervantes",
+  "isbn": "9788420412146",
+  "year": 1605,
+  "genre": "Novela",
+  "availableCopies": 3
+}
+```
+
+**Campos requeridos:**
+
+| Campo | Tipo | Reglas |
+|---|---|---|
+| `title` | string | no vacío |
+| `author` | string | no vacío |
+| `isbn` | string | 10 o 13 dígitos numéricos, único |
+| `year` | number | entero, 1000 — año actual |
+| `genre` | string | no vacío |
+| `availableCopies` | number | entero ≥ 0 |
+
+**Códigos de respuesta:**
+
+| Código | Significado |
+|---|---|
+| `200` | OK — operación exitosa |
+| `201` | Created — libro creado |
+| `400` | Bad Request — datos inválidos |
+| `404` | Not Found — libro no existe |
+| `409` | Conflict — ISBN duplicado |
+
+---
+
+### Rutas conservadas de semanas anteriores
+
+| Método | Ruta | Para qué sirve |
+|---|---|---|
+| GET | `/`, `/welcome` | Bienvenida |
+| GET / POST | `/courses` | Consultar o crear cursos |
+| GET / PATCH / DELETE | `/courses/:id` | Gestionar un curso |
+| GET / POST | `/students` | Consultar o registrar estudiantes |
+| GET / PATCH / DELETE | `/students/:id` | Gestionar un estudiante |
+| PATCH | `/students/:id/status` | Activar o desactivar |
+| POST / GET | `/enrollments` | Matricular o consultar |
+| GET | `/students/:id/enrollments` | Matrículas de un estudiante |
+| GET | `/courses/:id/enrollments` | Matrículas de un curso |
+| DELETE | `/enrollments/:id` | Cancelar matrícula |
+
+---
+
+## Tests
+
+```bash
+# Tests unitarios
+npm test
+
+# Tests de integración E2E
+npm run test:e2e
+
+# Tests de aceptación HTTP (requiere build)
+npm run test:acceptance
+```

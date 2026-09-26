@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../src/app.module.js';
+import { TestAppModule } from './test-app.module.js';
 import { configureApp } from '../src/setup-app.js';
 
 describe('Integración de Cursos, Estudiantes y Matrículas', () => {
@@ -10,7 +10,7 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
   let inactive: number;
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [TestAppModule],
     }).compile();
     app = module.createNestApplication();
     configureApp(app);

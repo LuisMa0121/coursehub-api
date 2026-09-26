@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { Server } from 'node:http';
-import { AppModule } from '../src/app.module.js';
+import { TestAppModule } from './test-app.module.js';
 import { configureApp } from '../src/setup-app.js';
 
 const initialCourses = [
@@ -13,7 +13,7 @@ const initialCourses = [
 
 async function createApplication(): Promise<INestApplication<Server>> {
   const module = await Test.createTestingModule({
-    imports: [AppModule],
+    imports: [TestAppModule],
   }).compile();
   const app = module.createNestApplication<INestApplication<Server>>();
   configureApp(app);
