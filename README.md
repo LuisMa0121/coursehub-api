@@ -6,7 +6,7 @@ Desarrollada con **NestJS**, **TypeORM** y **PostgreSQL**.
 
 ## Integrantes
 
-1. _______________________________________________
+1. Luis Mario Cedeño Bravo
 
 ## Descripción del proyecto
 
