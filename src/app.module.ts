@@ -23,7 +23,7 @@ import { WelcomeService } from './welcome.service.js';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'library'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        autoLoadEntities: true,
         synchronize: config.get<string>('NODE_ENV') !== 'production',
       }),
     }),
