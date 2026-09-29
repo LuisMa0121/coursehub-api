@@ -7,18 +7,22 @@ import { StudentsService } from '../students/students.service.js';
 import { CoursesService } from '../courses/courses.service.js';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto.js';
 import { FilterEnrollmentsDto } from './dto/filter-enrollments.dto.js';
+
 type Enrollment = { id: number; studentId: number; courseId: number };
+
 @Injectable()
 export class EnrollmentsService {
   private readonly enrollments: Enrollment[] = [];
   private nextId = 1;
+
   constructor(
     private readonly students: StudentsService,
     private readonly courses: CoursesService,
   ) {}
-  create(dto: CreateEnrollmentDto): Enrollment {
+
+  async create(dto: CreateEnrollmentDto): Promise<Enrollment> {
     const student = this.students.findOne(dto.studentId);
-    this.courses.findOne(String(dto.courseId));
+    await this.courses.findOne(String(dto.courseId));
     if (!student.isActive)
       throw new ConflictException(
         'No se puede matricular a un estudiante inactivo',
@@ -41,6 +45,7 @@ export class EnrollmentsService {
     this.enrollments.push(enrollment);
     return enrollment;
   }
+
   findAll(filters: FilterEnrollmentsDto = {}): Enrollment[] {
     return this.enrollments.filter(
       (item) =>
@@ -49,14 +54,17 @@ export class EnrollmentsService {
         (filters.courseId === undefined || item.courseId === filters.courseId),
     );
   }
+
   findByStudent(studentId: number): Enrollment[] {
     this.students.findOne(studentId);
     return this.findAll({ studentId });
   }
-  findByCourse(courseId: number): Enrollment[] {
-    this.courses.findOne(String(courseId));
+
+  async findByCourse(courseId: number): Promise<Enrollment[]> {
+    await this.courses.findOne(String(courseId));
     return this.findAll({ courseId });
   }
+
   remove(id: number): Enrollment {
     const index = this.enrollments.findIndex((item) => item.id === id);
     if (index === -1)

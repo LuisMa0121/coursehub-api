@@ -14,17 +14,16 @@ import { WelcomeService } from './welcome.service.js';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get<string>('DB_USER', 'postgres'),
-        password: config.get<string>('DB_PASSWORD', ''),
-        database: config.get<string>('DB_NAME', 'library'),
+        host: config.getOrThrow('DATABASE_HOST'),
+        port: Number(config.getOrThrow('DATABASE_PORT')),
+        username: config.getOrThrow('DATABASE_USER'),
+        password: config.getOrThrow('DATABASE_PASSWORD'),
+        database: config.getOrThrow('DATABASE_NAME'),
         autoLoadEntities: true,
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
+        synchronize: true,
       }),
     }),
     CoursesModule,

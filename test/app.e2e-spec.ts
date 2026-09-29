@@ -5,10 +5,10 @@ import type { Server } from 'node:http';
 import { TestAppModule } from './test-app.module.js';
 import { configureApp } from '../src/setup-app.js';
 
-const initialCourses = [
-  { id: 1, title: 'NestJS Fundamentals', level: 'beginner' },
-  { id: 2, title: 'REST APIs with NestJS', level: 'beginner' },
-  { id: 3, title: 'NestJS Architecture', level: 'intermediate' },
+const seedCourses = [
+  { title: 'NestJS Fundamentals', level: 'beginner' },
+  { title: 'REST APIs with NestJS', level: 'beginner' },
+  { title: 'NestJS Architecture', level: 'intermediate' },
 ];
 
 async function createApplication(): Promise<INestApplication<Server>> {
@@ -21,11 +21,25 @@ async function createApplication(): Promise<INestApplication<Server>> {
   return app;
 }
 
+async function seedDatabase(app: INestApplication<Server>) {
+  const created: { id: number; title: string; level: string }[] = [];
+  for (const course of seedCourses) {
+    const res = await request(app.getHttpServer())
+      .post('/courses')
+      .send(course)
+      .expect(201);
+    created.push(res.body);
+  }
+  return created;
+}
+
 describe('CourseHub API (HTTP)', () => {
   let app: INestApplication<Server>;
+  let initialCourses: { id: number; title: string; level: string }[];
 
   beforeEach(async () => {
     app = await createApplication();
+    initialCourses = await seedDatabase(app);
   });
 
   afterEach(async () => {
@@ -67,7 +81,7 @@ describe('CourseHub API (HTTP)', () => {
 
   it('GET /courses/:id devuelve un curso existente', async () => {
     await request(app.getHttpServer())
-      .get('/courses/1')
+      .get(`/courses/${initialCourses[0].id}`)
       .expect(200)
       .expect(initialCourses[0]);
   });
@@ -81,7 +95,7 @@ describe('CourseHub API (HTTP)', () => {
         .send(body)
         .expect(201);
 
-      expect(created.body).toEqual({ id: 4, ...body });
+      expect(created.body.id).toBeGreaterThan(initialCourses[2].id);
       await request(app.getHttpServer())
         .get(`/courses/${created.body.id}`)
         .expect(200)
@@ -131,19 +145,20 @@ describe('CourseHub API (HTTP)', () => {
         .post('/courses')
         .send({ title: 'Siguiente curso válido', level: 'beginner' })
         .expect(201);
-      expect(valid.body.id).toBe(4);
+      expect(valid.body.id).toBeGreaterThan(initialCourses[2].id);
     },
   );
 
   it('PATCH solo level preserva title y permite filtrar por el nivel nuevo', async () => {
+    const courseId = initialCourses[0].id;
     const expected = { ...initialCourses[0], level: 'advanced' };
     await request(app.getHttpServer())
-      .patch('/courses/1')
+      .patch(`/courses/${courseId}`)
       .send({ level: 'advanced' })
       .expect(200)
       .expect(expected);
     await request(app.getHttpServer())
-      .get('/courses/1')
+      .get(`/courses/${courseId}`)
       .expect(200)
       .expect(expected);
     await request(app.getHttpServer())
@@ -153,14 +168,15 @@ describe('CourseHub API (HTTP)', () => {
   });
 
   it('PATCH solo title preserva level y PATCH vacío conserva el curso', async () => {
+    const courseId = initialCourses[0].id;
     const expected = { ...initialCourses[0], title: 'Título actualizado' };
     await request(app.getHttpServer())
-      .patch('/courses/1')
+      .patch(`/courses/${courseId}`)
       .send({ title: expected.title })
       .expect(200)
       .expect(expected);
     await request(app.getHttpServer())
-      .patch('/courses/1')
+      .patch(`/courses/${courseId}`)
       .send({})
       .expect(200)
       .expect(expected);
@@ -178,18 +194,19 @@ describe('CourseHub API (HTTP)', () => {
   ])(
     'PATCH rechaza %s con 400 sin modificar el curso',
     async (_label, body) => {
+      const courseId = initialCourses[0].id;
       const expected = { ...initialCourses[0], level: 'advanced' };
       await request(app.getHttpServer())
-        .patch('/courses/1')
+        .patch(`/courses/${courseId}`)
         .send({ level: 'advanced' })
         .expect(200);
       const response = await request(app.getHttpServer())
-        .patch('/courses/1')
+        .patch(`/courses/${courseId}`)
         .send(body)
         .expect(400);
       expect(response.body.statusCode).toBe(400);
       await request(app.getHttpServer())
-        .get('/courses/1')
+        .get(`/courses/${courseId}`)
         .expect(200)
         .expect(expected);
     },
@@ -224,12 +241,13 @@ describe('CourseHub API (HTTP)', () => {
   );
 
   it('DELETE devuelve el curso eliminado con 200; consultarlo o borrarlo de nuevo da 404', async () => {
+    const courseId = initialCourses[1].id;
     await request(app.getHttpServer())
-      .delete('/courses/2')
+      .delete(`/courses/${courseId}`)
       .expect(200)
       .expect(initialCourses[1]);
-    await request(app.getHttpServer()).get('/courses/2').expect(404);
-    await request(app.getHttpServer()).delete('/courses/2').expect(404);
+    await request(app.getHttpServer()).get(`/courses/${courseId}`).expect(404);
+    await request(app.getHttpServer()).delete(`/courses/${courseId}`).expect(404);
     await request(app.getHttpServer())
       .get('/courses')
       .expect(200)
@@ -259,11 +277,14 @@ describe('CourseHub API (HTTP)', () => {
   });
 
   it('crear otra aplicación recupera las semillas y pierde los cambios temporales', async () => {
+    const courseId = initialCourses[0].id;
     await request(app.getHttpServer())
-      .patch('/courses/1')
+      .patch(`/courses/${courseId}`)
       .send({ title: 'Cambio temporal' })
       .expect(200);
-    await request(app.getHttpServer()).delete('/courses/2').expect(200);
+    await request(app.getHttpServer())
+      .delete(`/courses/${initialCourses[1].id}`)
+      .expect(200);
     await request(app.getHttpServer())
       .post('/courses')
       .send({ title: 'Nuevo temporal', level: 'advanced' })
@@ -271,15 +292,17 @@ describe('CourseHub API (HTTP)', () => {
 
     const restarted = await createApplication();
     try {
+      // Con TypeORM + dropSchema:true, la nueva app arranca con BD vacía → re-siembra
+      const freshCourses = await seedDatabase(restarted);
       await request(restarted.getHttpServer())
         .get('/courses')
         .expect(200)
-        .expect(initialCourses);
+        .expect(freshCourses);
       const created = await request(restarted.getHttpServer())
         .post('/courses')
         .send({ title: 'Primer curso tras reiniciar', level: 'beginner' })
         .expect(201);
-      expect(created.body.id).toBe(4);
+      expect(created.body.id).toBeGreaterThan(freshCourses[2].id);
     } finally {
       await restarted.close();
     }
