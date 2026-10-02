@@ -63,16 +63,16 @@ Edita `.env` con los datos de tu base de datos PostgreSQL:
 ```env
 PORT=3000
 NODE_ENV=development
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=tu_contraseña
-DB_NAME=library
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=tu_contraseña
+DATABASE_NAME=coursehub
 ```
 
-> **Nota:** Debes crear la base de datos `library` en PostgreSQL antes de iniciar:
+> **Nota:** Debes crear la base de datos `coursehub` (o la que definas en `DATABASE_NAME`) en PostgreSQL antes de iniciar:
 > ```sql
-> CREATE DATABASE library;
+> CREATE DATABASE coursehub;
 > ```
 
 ### 4. Iniciar en modo desarrollo
@@ -134,17 +134,27 @@ El panel de estudiantes en `http://localhost:3000/panel/`.
 
 ---
 
-### Rutas conservadas de semanas anteriores
+### Cursos (`/courses`) — Persistencia con TypeORM y PostgreSQL (Sesión 8)
+
+| Método | Ruta | Descripción | Cuerpo |
+|---|---|---|---|
+| `GET` | `/courses` | Listar cursos (filtro opcional `?level=beginner`) | — |
+| `GET` | `/courses/:id` | Obtener un curso por id | — |
+| `POST` | `/courses` | Crear un curso | `{ "title": "string", "level": "beginner\|intermediate\|advanced" }` |
+| `PATCH` | `/courses/:id` | Actualización parcial | JSON con campos a modificar |
+| `DELETE` | `/courses/:id` | Eliminar curso | — |
+
+---
+
+### Otras rutas de la aplicación
 
 | Método | Ruta | Para qué sirve |
 |---|---|---|
 | GET | `/`, `/welcome` | Bienvenida |
-| GET / POST | `/courses` | Consultar o crear cursos |
-| GET / PATCH / DELETE | `/courses/:id` | Gestionar un curso |
 | GET / POST | `/students` | Consultar o registrar estudiantes |
 | GET / PATCH / DELETE | `/students/:id` | Gestionar un estudiante |
-| PATCH | `/students/:id/status` | Activar o desactivar |
-| POST / GET | `/enrollments` | Matricular o consultar |
+| PATCH | `/students/:id/status` | Activar o desactivar estudiante |
+| POST / GET | `/enrollments` | Matricular o consultar matrículas |
 | GET | `/students/:id/enrollments` | Matrículas de un estudiante |
 | GET | `/courses/:id/enrollments` | Matrículas de un curso |
 | DELETE | `/enrollments/:id` | Cancelar matrícula |

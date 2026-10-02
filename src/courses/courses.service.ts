@@ -12,11 +12,8 @@ export class CoursesService {
     private readonly coursesRepository: Repository<Course>,
   ) {}
 
-  findAll(level?: string): Promise<Course[]> {
-    if (!level) {
-      return this.coursesRepository.find();
-    }
-    return this.coursesRepository.findBy({ level });
+  findAll(level?: string) {
+    return this.coursesRepository.find({ where: level ? { level } : {} });
   }
 
   async findOne(id: string): Promise<Course> {
