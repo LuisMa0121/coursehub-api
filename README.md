@@ -1,6 +1,6 @@
-# Library API — CourseHub
+# CourseHub API
 
-API REST para la **gestión de una biblioteca**: libros, cursos, estudiantes y matrículas.
+API REST para la **gestión de cursos, estudiantes y matrículas** con persistencia en PostgreSQL.
 
 Desarrollada con **NestJS**, **TypeORM** y **PostgreSQL**.
 
@@ -10,31 +10,44 @@ Desarrollada con **NestJS**, **TypeORM** y **PostgreSQL**.
 
 ## Descripción del proyecto
 
-La API permite administrar el catálogo de libros de una biblioteca. Los datos se persisten en PostgreSQL y se conservan al reiniciar el servidor.
+CourseHub API permite administrar cursos, estudiantes y matrículas. Todos los datos se persisten en PostgreSQL mediante TypeORM y se conservan entre reinicios del servidor.
 
-### Entidades previstas
+### Entidades y relaciones
 
 ```
-┌──────────────┐       ┌──────────────┐
-│    Book      │       │   Student    │
-│──────────────│       │──────────────│
-│ id           │       │ id           │
-│ title        │       │ name         │
-│ author       │       │ email        │
-│ isbn         │       │ age          │
-│ year         │       │ career       │
-│ genre        │       │ semester     │
-│ availableCop │       │ isActive     │
-└──────────────┘       └──────────────┘
+Course 1 ──── * Enrollment * ──── 1 Student
 
-┌──────────────┐       ┌──────────────┐
-│   Course     │       │  Enrollment  │
-│──────────────│       │──────────────│
-│ id           │◄──────│ id           │
-│ title        │       │ studentId    │
-│ level        │       │ courseId     │
-└──────────────┘       └──────────────┘
+┌──────────────┐        ┌─────────────────┐        ┌──────────────┐
+│   Course     │        │   Enrollment    │        │   Student    │
+│──────────────│        │─────────────────│        │──────────────│
+│ id           │◄───────│ id              │───────►│ id           │
+│ title        │  FK    │ courseId (FK)   │  FK    │ name         │
+│ level        │        │ studentId (FK)  │        │ email unique │
+└──────────────┘        └─────────────────┘        │ age          │
+                                                   │ career       │
+┌──────────────┐                                   │ semester     │
+│    Book      │                                   │ isActive     │
+│──────────────│                                   └──────────────┘
+│ id           │
+│ title        │
+│ author       │
+│ isbn unique  │
+│ year         │
+│ genre        │
+│ availableCop │
+└──────────────┘
 ```
+
+## Requisitos de PostgreSQL
+
+- PostgreSQL ≥ 13 instalado y en ejecución local
+- Crear la base de datos antes de iniciar la API:
+
+```sql
+CREATE DATABASE coursehub;
+```
+
+> La API usa `synchronize: true` en desarrollo, por lo que TypeORM creará las tablas automáticamente al arrancar.
 
 ## Cómo ejecutar
 
@@ -58,7 +71,7 @@ Copia el archivo de ejemplo y ajusta los valores:
 cp .env.example .env
 ```
 
-Edita `.env` con los datos de tu base de datos PostgreSQL:
+Edita `.env` con los datos de tu instalación de PostgreSQL:
 
 ```env
 PORT=3000
@@ -70,71 +83,19 @@ DATABASE_PASSWORD=tu_contraseña
 DATABASE_NAME=coursehub
 ```
 
-> **Nota:** Debes crear la base de datos `coursehub` (o la que definas en `DATABASE_NAME`) en PostgreSQL antes de iniciar:
-> ```sql
-> CREATE DATABASE coursehub;
-> ```
-
 ### 4. Iniciar en modo desarrollo
 
 ```bash
 npm run start:dev
 ```
 
-La API quedará disponible en `http://localhost:3000`.  
-El panel de estudiantes en `http://localhost:3000/panel/`.
+La API quedará disponible en `http://localhost:3000`.
 
 ---
 
 ## Endpoints
 
-### Libros (`/books`) — Recurso principal con persistencia PostgreSQL
-
-| Método | Ruta | Descripción | Cuerpo |
-|---|---|---|---|
-| `GET` | `/books` | Listar todos los libros | — |
-| `GET` | `/books/:id` | Obtener un libro por id | — |
-| `POST` | `/books` | Crear un libro | JSON |
-| `PATCH` | `/books/:id` | Actualizar parcialmente | JSON |
-| `DELETE` | `/books/:id` | Eliminar un libro | — |
-
-**Cuerpo de creación (`POST /books`):**
-
-```json
-{
-  "title": "El Quijote",
-  "author": "Miguel de Cervantes",
-  "isbn": "9788420412146",
-  "year": 1605,
-  "genre": "Novela",
-  "availableCopies": 3
-}
-```
-
-**Campos requeridos:**
-
-| Campo | Tipo | Reglas |
-|---|---|---|
-| `title` | string | no vacío |
-| `author` | string | no vacío |
-| `isbn` | string | 10 o 13 dígitos numéricos, único |
-| `year` | number | entero, 1000 — año actual |
-| `genre` | string | no vacío |
-| `availableCopies` | number | entero ≥ 0 |
-
-**Códigos de respuesta:**
-
-| Código | Significado |
-|---|---|
-| `200` | OK — operación exitosa |
-| `201` | Created — libro creado |
-| `400` | Bad Request — datos inválidos |
-| `404` | Not Found — libro no existe |
-| `409` | Conflict — ISBN duplicado |
-
----
-
-### Cursos (`/courses`) — Persistencia con TypeORM y PostgreSQL (Sesión 8)
+### Cursos (`/courses`) — Persistencia PostgreSQL
 
 | Método | Ruta | Descripción | Cuerpo |
 |---|---|---|---|
@@ -146,18 +107,79 @@ El panel de estudiantes en `http://localhost:3000/panel/`.
 
 ---
 
-### Otras rutas de la aplicación
+### Estudiantes (`/students`) — Persistencia PostgreSQL
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/students` | Listar (filtros opcionales: `career`, `semester`, `isActive`) |
+| `GET` | `/students/:id` | Obtener estudiante por id |
+| `POST` | `/students` | Crear estudiante |
+| `PATCH` | `/students/:id` | Actualizar parcialmente |
+| `PATCH` | `/students/:id/status` | Activar o desactivar |
+| `DELETE` | `/students/:id` | Eliminar (solo activos) |
+
+**Cuerpo de creación (`POST /students`):**
+
+```json
+{
+  "name": "string",
+  "email": "correo@ejemplo.com",
+  "age": 20,
+  "career": "string",
+  "semester": 5,
+  "isActive": true
+}
+```
+
+| Código | Significado |
+|---|---|
+| `201` | Creado |
+| `400` | Datos inválidos |
+| `404` | Estudiante no encontrado |
+| `409` | Correo duplicado |
+
+---
+
+### Matrículas (`/enrollments`) — Persistencia PostgreSQL con relaciones FK
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/enrollments` | Crear matrícula (`studentId`, `courseId`) |
+| `GET` | `/enrollments` | Listar (filtros opcionales: `studentId`, `courseId`) |
+| `GET` | `/students/:studentId/enrollments` | Matrículas de un estudiante |
+| `GET` | `/courses/:courseId/enrollments` | Matrículas de un curso |
+| `DELETE` | `/enrollments/:id` | Cancelar matrícula |
+
+**Reglas de matrícula:**
+
+| Situación | Código HTTP |
+|---|---|
+| Estudiante o curso no existe | `404 Not Found` |
+| Estudiante inactivo | `400 Bad Request` |
+| Matrícula duplicada | `409 Conflict` |
+
+Las respuestas incluyen los objetos completos de `student` y `course`.
+
+---
+
+### Libros (`/books`) — Persistencia PostgreSQL
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/books` | Listar todos los libros |
+| `GET` | `/books/:id` | Obtener libro por id |
+| `POST` | `/books` | Crear libro |
+| `PATCH` | `/books/:id` | Actualización parcial |
+| `DELETE` | `/books/:id` | Eliminar libro |
+
+---
+
+### Otras rutas
 
 | Método | Ruta | Para qué sirve |
 |---|---|---|
-| GET | `/`, `/welcome` | Bienvenida |
-| GET / POST | `/students` | Consultar o registrar estudiantes |
-| GET / PATCH / DELETE | `/students/:id` | Gestionar un estudiante |
-| PATCH | `/students/:id/status` | Activar o desactivar estudiante |
-| POST / GET | `/enrollments` | Matricular o consultar matrículas |
-| GET | `/students/:id/enrollments` | Matrículas de un estudiante |
-| GET | `/courses/:id/enrollments` | Matrículas de un curso |
-| DELETE | `/enrollments/:id` | Cancelar matrícula |
+| GET | `/` | Mensaje de bienvenida |
+| GET | `/welcome` | Saludo de bienvenida en JSON |
 
 ---
 
@@ -169,7 +191,4 @@ npm test
 
 # Tests de integración E2E
 npm run test:e2e
-
-# Tests de aceptación HTTP (requiere build)
-npm run test:acceptance
 ```

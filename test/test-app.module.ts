@@ -6,7 +6,9 @@ import { Book } from '../src/books/book.entity.js';
 import { BooksModule } from '../src/books/books.module.js';
 import { Course } from '../src/courses/entities/course.entity.js';
 import { CoursesModule } from '../src/courses/courses.module.js';
+import { Enrollment } from '../src/enrollments/entities/enrollment.entity.js';
 import { EnrollmentsModule } from '../src/enrollments/enrollments.module.js';
+import { Student } from '../src/students/entities/student.entity.js';
 import { StudentsModule } from '../src/students/students.module.js';
 import { WelcomeController } from '../src/welcome.controller.js';
 import { WelcomeService } from '../src/welcome.service.js';
@@ -20,7 +22,7 @@ import { WelcomeService } from '../src/welcome.service.js';
     TypeOrmModule.forRoot({
       type: 'sqljs',
       database: new Uint8Array(),
-      entities: [Book, Course],
+      entities: [Book, Course, Student, Enrollment],
       synchronize: true,
       dropSchema: true,
       autoSave: false,

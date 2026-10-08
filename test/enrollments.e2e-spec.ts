@@ -66,19 +66,28 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
       .send({ studentId, courseId: courseId ?? course1Id });
 
   it('registra, evita duplicados, filtra por ambas claves y cancela', async () => {
-    const first = { id: 1, studentId: active, courseId: course1Id };
-    await enroll(active).expect(201).expect(first);
+    const res1 = await enroll(active).expect(201);
+    expect(res1.body.id).toBe(1);
+    expect(res1.body.student.id).toBe(active);
+    expect(res1.body.course.id).toBe(course1Id);
+
     await enroll(active).expect(409);
-    await enroll(active, course2Id)
-      .expect(201)
-      .expect({ id: 2, studentId: active, courseId: course2Id });
+
+    const res2 = await enroll(active, course2Id).expect(201);
+    expect(res2.body.id).toBe(2);
+    expect(res2.body.student.id).toBe(active);
+    expect(res2.body.course.id).toBe(course2Id);
+
     await request(app.getHttpServer())
       .patch(`/students/${inactive}/status`)
       .send({ isActive: true })
       .expect(200);
-    await enroll(inactive)
-      .expect(201)
-      .expect({ id: 3, studentId: inactive, courseId: course1Id });
+
+    const res3 = await enroll(inactive).expect(201);
+    expect(res3.body.id).toBe(3);
+    expect(res3.body.student.id).toBe(inactive);
+    expect(res3.body.course.id).toBe(course1Id);
+
     for (const [query, ids] of [
       ['', [1, 2, 3]],
       [`?studentId=${active}`, [1, 2]],
@@ -91,35 +100,44 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
         .expect(200);
       expect(response.body.map((item: { id: number }) => item.id)).toEqual(ids);
     }
-    await request(app.getHttpServer())
+
+    const byStudent = await request(app.getHttpServer())
       .get(`/students/${active}/enrollments`)
-      .expect(200)
-      .expect([first, { id: 2, studentId: active, courseId: course2Id }]);
-    await request(app.getHttpServer())
+      .expect(200);
+    expect(byStudent.body.map((e: { id: number }) => e.id)).toEqual([1, 2]);
+    expect(byStudent.body[0].student.id).toBe(active);
+
+    const byCourse = await request(app.getHttpServer())
       .get(`/courses/${course2Id}/enrollments`)
-      .expect(200)
-      .expect([{ id: 2, studentId: active, courseId: course2Id }]);
-    await request(app.getHttpServer())
+      .expect(200);
+    expect(byCourse.body.map((e: { id: number }) => e.id)).toEqual([2]);
+    expect(byCourse.body[0].course.id).toBe(course2Id);
+
+    const deleted = await request(app.getHttpServer())
       .delete('/enrollments/1')
-      .expect(200)
-      .expect(first);
+      .expect(200);
+    expect(deleted.body.id).toBe(1);
+
     await request(app.getHttpServer()).delete('/enrollments/1').expect(404);
-    await enroll(active)
-      .expect(201)
-      .expect({ ...first, id: 4 });
+
+    const re = await enroll(active).expect(201);
+    expect(re.body.id).toBe(4);
+    expect(re.body.student.id).toBe(active);
+    expect(re.body.course.id).toBe(course1Id);
   });
 
   it('rechaza inactivo y recursos inexistentes sin consumir identificadores', async () => {
-    await enroll(inactive).expect(409);
+    await enroll(inactive).expect(400); // estudiante inactivo → 400
     await enroll(999).expect(404);
     await enroll(active, 999).expect(404);
     await request(app.getHttpServer())
       .get('/enrollments')
       .expect(200)
       .expect([]);
-    await enroll(active)
-      .expect(201)
-      .expect({ id: 1, studentId: active, courseId: course1Id });
+    const res = await enroll(active).expect(201);
+    expect(res.body.id).toBe(1);
+    expect(res.body.student.id).toBe(active);
+    expect(res.body.course.id).toBe(course1Id);
   });
 
   it('consulta el estado actual compartido del estudiante y los cursos creados', async () => {
@@ -127,7 +145,7 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
       .patch(`/students/${active}/status`)
       .send({ isActive: false })
       .expect(200);
-    await enroll(active).expect(409);
+    await enroll(active).expect(400); // inactivo → 400
     await request(app.getHttpServer())
       .patch(`/students/${active}/status`)
       .send({ isActive: true })
@@ -136,7 +154,9 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
       .post('/courses')
       .send({ title: 'Curso nuevo', level: 'beginner' })
       .expect(201);
-    await enroll(active, course.body.id).expect(201);
+    const res = await enroll(active, course.body.id).expect(201);
+    expect(res.body.student.id).toBe(active);
+    expect(res.body.course.id).toBe(course.body.id);
   });
 
   it.each([

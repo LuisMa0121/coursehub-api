@@ -1,83 +1,79 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateStudentDto } from './dto/create-student.dto.js';
 import { FilterStudentsDto } from './dto/filter-students.dto.js';
 import { UpdateStudentDto } from './dto/update-student.dto.js';
 import { UpdateStudentStatusDto } from './dto/update-student-status.dto.js';
-type Student = {
-  id: number;
-  name: string;
-  email: string;
-  age: number;
-  career: string;
-  semester: number;
-  isActive: boolean;
-};
+import { Student } from './entities/student.entity.js';
 
 @Injectable()
 export class StudentsService {
-  private readonly students: Student[] = [];
-  private nextId = 1;
+  constructor(
+    @InjectRepository(Student)
+    private readonly studentsRepository: Repository<Student>,
+  ) {}
 
-  create(dto: CreateStudentDto): Student {
-    this.ensureUniqueEmail(dto.email);
-    const student: Student = { ...dto, id: this.nextId++ };
-    this.students.push(student);
-    return student;
+  async create(dto: CreateStudentDto): Promise<Student> {
+    await this.ensureUniqueEmail(dto.email);
+    const student = this.studentsRepository.create(dto);
+    return this.studentsRepository.save(student);
   }
 
-  findAll(filters: FilterStudentsDto): Student[] {
-    return this.students.filter(
-      (student) =>
-        (filters.career === undefined ||
-          student.career.toLowerCase() === filters.career.toLowerCase()) &&
-        (filters.semester === undefined ||
-          student.semester === filters.semester) &&
-        (filters.isActive === undefined ||
-          student.isActive === filters.isActive),
-    );
+  findAll(filters: FilterStudentsDto): Promise<Student[]> {
+    const where: FindOptionsWhere<Student> = {};
+    if (filters.career !== undefined)
+      where.career = filters.career.toLowerCase();
+    if (filters.semester !== undefined) where.semester = filters.semester;
+    if (filters.isActive !== undefined) where.isActive = filters.isActive;
+    return this.studentsRepository.findBy(where);
   }
 
-  findOne(id: number): Student {
-    const student = this.students.find((item) => item.id === id);
+  async findOne(id: number): Promise<Student> {
+    const student = await this.studentsRepository.findOneBy({ id });
     if (!student)
       throw new NotFoundException(`No existe el estudiante con id ${id}`);
     return student;
   }
 
-  update(id: number, dto: UpdateStudentDto): Student {
-    const student = this.findOne(id);
-    if (dto.email !== undefined) this.ensureUniqueEmail(dto.email, id);
+  async update(id: number, dto: UpdateStudentDto): Promise<Student> {
+    const student = await this.findOne(id);
+    if (dto.email !== undefined) await this.ensureUniqueEmail(dto.email, id);
     Object.assign(student, dto);
-    return student;
+    return this.studentsRepository.save(student);
   }
 
-  updateStatus(id: number, dto: UpdateStudentStatusDto): Student {
-    const student = this.findOne(id);
+  async updateStatus(
+    id: number,
+    dto: UpdateStudentStatusDto,
+  ): Promise<Student> {
+    const student = await this.findOne(id);
     student.isActive = dto.isActive;
-    return student;
+    return this.studentsRepository.save(student);
   }
 
-  remove(id: number): Student {
-    const student = this.findOne(id);
+  async remove(id: number): Promise<Student> {
+    const student = await this.findOne(id);
     if (!student.isActive) {
-      throw new ConflictException(
+      throw new BadRequestException(
         'No se puede eliminar un estudiante inactivo; actívalo primero',
       );
     }
-    this.students.splice(this.students.indexOf(student), 1);
-    return student;
+    await this.studentsRepository.remove(student);
+    return { ...student, id };
   }
 
-  private ensureUniqueEmail(email: string, excludingId?: number): void {
-    if (
-      this.students.some(
-        (student) => student.email === email && student.id !== excludingId,
-      )
-    ) {
+  private async ensureUniqueEmail(
+    email: string,
+    excludingId?: number,
+  ): Promise<void> {
+    const existing = await this.studentsRepository.findOneBy({ email });
+    if (existing && existing.id !== excludingId) {
       throw new ConflictException(
         'Ya existe un estudiante con ese correo electrónico',
       );
