@@ -29,7 +29,7 @@ import { WelcomeService } from './welcome.service.js';
         autoLoadEntities: true,
         synchronize:
           config.get('NODE_ENV') !== 'production' &&
-          config.get('DATABASE_SYNCHRONIZE') !== 'false',
+          config.get('DATABASE_SYNCHRONIZE') === 'true',
       }),
     }),
     CoursesModule,

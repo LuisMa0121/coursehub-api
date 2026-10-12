@@ -33,7 +33,7 @@ export class UsersService {
       name: dto.name,
       email: dto.email.toLowerCase(),
       password: hashedPassword,
-      role: dto.role || 'user',
+      role: 'user',
       createdAt: new Date().toISOString(),
     });
 

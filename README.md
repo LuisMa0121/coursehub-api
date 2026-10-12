@@ -15,7 +15,7 @@ API REST modular desarrollada con **NestJS**, **TypeORM** y **PostgreSQL** para 
 - Ofrecer consultas paginadas, filtrables y ordenables mediante parámetros de consulta con metadatos de paginación (`total`, `page`, `limit`, `totalPages`).
 - Incorporar registro de usuarios con contraseña cifrada (`bcryptjs`), autenticación y emisión de tokens **JWT**.
 - Proteger rutas de escritura con un Guard JWT (`JwtAuthGuard`) diferenciando accesos autorizados y no autorizados (401).
-- Implementar migraciones versionadas de TypeORM sin depender de `synchronize` en producción.
+- Implementar migraciones versionadas de TypeORM sin depender de `synchronize` en la entrega.
 
 ---
 
@@ -87,8 +87,8 @@ DATABASE_USER=postgres
 DATABASE_PASSWORD=tu_contraseña_aqui
 DATABASE_NAME=coursehub
 
-# Sincronización automática de TypeORM (true solo en desarrollo local; false en producción)
-DATABASE_SYNCHRONIZE=true
+# Esquema administrado por migraciones en todos los entornos de entrega
+DATABASE_SYNCHRONIZE=false
 
 # Seguridad y Autenticación JWT
 JWT_SECRET=super_secret_jwt_key_para_desarrollo_cambiar_en_produccion
@@ -100,7 +100,7 @@ JWT_EXPIRES_IN=1d
 ## Cómo Ejecutar el Proyecto
 
 ### 1. Requisitos previos
-- Node.js ≥ 18
+- Node.js ≥ 24
 - PostgreSQL en ejecución local (crear base de datos `coursehub`)
 
 ```sql
@@ -113,7 +113,7 @@ npm install
 ```
 
 ### 3. Migraciones de Base de Datos
-Para entornos donde `DATABASE_SYNCHRONIZE=false`:
+Ejecutar siempre antes de iniciar la API. El DataSource carga `.env` desde la raíz del proyecto:
 ```bash
 # Compilar proyecto y ejecutar migraciones versionadas
 npm run build
@@ -222,7 +222,7 @@ La petición se ejecuta con código `200` o `201`.
 
 ### 6. Cursos, Estudiantes y Matrículas (`/courses`, `/students`, `/enrollments`)
 
-Se conservan al 100% las rutas persistentes de semanas anteriores:
+Se conservan las rutas persistentes de semanas anteriores:
 - `/courses`: CRUD persistente con TypeORM.
 - `/students`: CRUD persistente con validación de correo único.
 - `/enrollments`: Matrículas persistentes con relaciones foráneas a cursos y estudiantes.
@@ -235,6 +235,51 @@ Se conservan al 100% las rutas persistentes de semanas anteriores:
 # Tests unitarios
 npm test
 
-# Tests de integración E2E (105 tests pasando al 100%)
+# Tests de integración E2E (108 pruebas E2E)
 npm run test:e2e
 ```
+
+
+## Verificación de la segunda etapa del 11 de octubre de 2026
+
+Se verificaron 108 pruebas E2E en SQL.js y 26 comprobaciones locales en PostgreSQL.
+`docs/etapa2/verificacion.json` contiene respuestas sanitizadas sin tokens utilizables ni contraseñas de la base de datos.
+La API se reinició con `DATABASE_SYNCHRONIZE=false` y conservó la categoría y sus tres libros.
+
+### Migración desde la etapa anterior
+
+La migración inicial crea las tablas ausentes. `UpgradeStageOneSchema1791676800000` agrega `books.categoryId` cuando la tabla ya existe, conserva los libros y alinea las claves foráneas de matrículas con `ON DELETE CASCADE`.
+Su reversión conserva `categoryId` para no perder datos; devuelve las claves de matrículas a `NO ACTION`. No ejecutar la reversión de la migración inicial sobre una base con datos que deban conservarse, pues elimina las tablas.
+
+```bash
+npm run build
+npm run migration:run
+npm run test:migrations
+npm run start:dev
+```
+
+`test:migrations` comprueba un esquema vacío y un esquema de primera etapa dentro de transacciones que se revierten. Requiere permiso para crear un esquema temporal en la base local. No usa synchronize.
+
+### Parámetros de GET books
+
+Sin parámetros se conserva la respuesta de lista de la etapa anterior. Con cualquiera de los parámetros siguientes se devuelve `{ items, meta }`, incluyendo `total`, `page`, `limit` y `totalPages`.
+
+| Parámetro | Validación y efecto |
+|---|---|
+| search | Texto; busca título o autor sin distinguir mayúsculas |
+| genre | Texto; coincidencia parcial de género |
+| year | Entero mayor o igual a 1000; coincidencia exacta |
+| categoryId | Entero positivo; filtra por clave de categoría |
+| page | Entero mayor o igual a 1; predeterminado 1 |
+| limit | Entero entre 1 y 50; predeterminado 10 |
+| sortBy | id, title, author, year o availableCopies; predeterminado id |
+| order | ASC o DESC; se admite entrada en minúsculas; predeterminado ASC |
+
+### Cuenta exclusiva para demostración local
+
+Correo: `etapa2.demo@example.test`. Contraseña de demostración: `Etapa2Demo2026!`.
+No corresponde a una cuenta personal ni debe reutilizarse en servicios externos. Login en `POST /auth/login`.
+Datos conservados en la base local `coursehub`: categoría 1, libros 1, 2 y 3, préstamo 1 devuelto.
+El puerto local de PostgreSQL usado en esta revisión fue 5433; adaptar `.env` a cada equipo. El ejemplo 5432 es el puerto estándar.
+
+El registro público fija el rol `user` y rechaza `role` en el DTO. `JWT_SECRET` es obligatorio; definir un valor privado en `.env`. Nunca publicar el secreto ni el token completo en las capturas.

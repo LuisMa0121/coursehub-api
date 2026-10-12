@@ -1,7 +1,7 @@
 {
   "name": "coursehub-api",
   "version": "0.0.1",
-  "description": "CourseHub API: CRUD de cursos en memoria con DTOs, validacion y errores HTTP (semanas 1 a 3).",
+  "description": "Library API con NestJS, PostgreSQL, migraciones, relaciones y autenticación JWT",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -23,7 +23,8 @@
     "test:acceptance": "npm run build && node --test test/students.e2e.cjs test/courses.e2e.cjs test/interface.e2e.cjs",
     "typeorm": "typeorm -d dist/data-source.js",
     "migration:run": "typeorm migration:run -d dist/data-source.js",
-    "migration:revert": "typeorm migration:revert -d dist/data-source.js"
+    "migration:revert": "typeorm migration:revert -d dist/data-source.js",
+    "test:migrations": "node test/migrations.postgres.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

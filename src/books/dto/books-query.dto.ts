@@ -46,12 +46,12 @@ export class BooksQueryDto {
   @IsIn(['id', 'title', 'author', 'year', 'availableCopies'], {
     message: 'sortBy debe ser uno de: id, title, author, year, availableCopies',
   })
-  sortBy: 'id' | 'title' | 'author' | 'year' | 'availableCopies' = 'id';
+  sortBy?: 'id' | 'title' | 'author' | 'year' | 'availableCopies';
 
   @IsOptional()
   @Transform(({ value }) => (value ? String(value).toUpperCase() : 'ASC'))
   @IsIn(['ASC', 'DESC'], {
     message: 'order debe ser ASC o DESC',
   })
-  order: 'ASC' | 'DESC' = 'ASC';
+  order?: 'ASC' | 'DESC';
 }

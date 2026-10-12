@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from './book.entity.js';
+import { Category } from '../categories/entities/category.entity.js';
 import { BooksQueryDto } from './dto/books-query.dto.js';
 import { CreateBookDto } from './dto/create-book.dto.js';
 import { UpdateBookDto } from './dto/update-book.dto.js';
@@ -24,6 +25,7 @@ export class BooksService {
         `Ya existe un libro con el ISBN ${dto.isbn}`,
       );
     }
+    await this.validateCategory(dto.categoryId);
     const book = this.booksRepository.create(dto);
     return this.booksRepository.save(book);
   }
@@ -37,7 +39,8 @@ export class BooksService {
         query.search !== undefined ||
         query.genre !== undefined ||
         query.year !== undefined ||
-        query.categoryId !== undefined);
+        query.categoryId !== undefined ||
+        query.sortBy !== undefined || query.order !== undefined);
 
     if (!isPaginated) {
       return this.booksRepository.find({ relations: { category: true } });
@@ -116,8 +119,15 @@ export class BooksService {
         );
       }
     }
+    await this.validateCategory(dto.categoryId);
     Object.assign(book, dto);
     return this.booksRepository.save(book);
+  }
+
+  private async validateCategory(id?: number | null): Promise<void> {
+    if (id != null && !(await this.booksRepository.manager.getRepository(Category).existsBy({ id }))) {
+      throw new NotFoundException(`Categoría con id ${id} no encontrada`);
+    }
   }
 
   async remove(id: number): Promise<Book> {

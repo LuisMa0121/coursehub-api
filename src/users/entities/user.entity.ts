@@ -4,7 +4,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Loan } from '../../loans/entities/loan.entity.js';
 
 @Entity('users')
 export class User {

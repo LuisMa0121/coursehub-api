@@ -291,6 +291,26 @@ describe('Trabajo Autónomo Segunda Etapa - E2E Tests', () => {
       }
     });
 
+    it('GET /books con solo ordenamiento devuelve metadatos y aplica DESC', async () => {
+      const res = await request(app.getHttpServer()).get('/books?sortBy=year&order=DESC').expect(200);
+      expect(res.body.meta.total).toBeGreaterThanOrEqual(4);
+      const years = res.body.items.map((book: { year: number }) => book.year);
+      expect(years).toEqual([...years].sort((a: number, b: number) => b - a));
+    });
+
+    it('POST /books rechaza una categoría inexistente con 404', async () => {
+      await request(app.getHttpServer()).post('/books').send({
+        title: 'Categoría inexistente', author: 'Prueba', isbn: '9780000000001',
+        year: 2020, genre: 'Prueba', availableCopies: 1, categoryId: 2147483647,
+      }).expect(404);
+    });
+
+    it('POST /auth/register no permite asignarse un rol', async () => {
+      await request(app.getHttpServer()).post('/auth/register').send({
+        name: 'Prueba', email: 'role@example.com', password: 'password123', role: 'admin',
+      }).expect(400);
+    });
+
     it('GET /books?page=0 - rechaza página inválida con 400 Bad Request', async () => {
       await request(app.getHttpServer()).get('/books?page=0').expect(400);
     });

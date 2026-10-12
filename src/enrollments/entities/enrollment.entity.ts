@@ -17,11 +17,12 @@ export class Enrollment {
   @ManyToOne(() => Student, (student) => student.enrollments, {
     nullable: false,
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 
-  @ManyToOne(() => Course, { nullable: false, eager: false })
+  @ManyToOne(() => Course, { nullable: false, eager: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'courseId' })
   course: Course;
 }

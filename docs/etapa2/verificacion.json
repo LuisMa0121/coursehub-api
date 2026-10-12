@@ -1,0 +1,620 @@
+{
+  "date": "2026-10-11",
+  "database": "coursehub",
+  "apiPort": 3012,
+  "credentials": {
+    "name": "Demostración Etapa 2",
+    "email": "etapa2.demo@example.test",
+    "password": "Etapa2Demo2026!"
+  },
+  "categoryId": 1,
+  "bookIds": [
+    1,
+    2,
+    3
+  ],
+  "loanId": 1,
+  "results": [
+    {
+      "name": "Registro",
+      "method": "POST",
+      "path": "/auth/register",
+      "status": 201,
+      "response": {
+        "message": "Usuario registrado exitosamente",
+        "user": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "email": "etapa2.demo@example.test",
+          "role": "user",
+          "createdAt": "2026-10-12T02:15:06.961Z"
+        },
+        "access_token": "[JWT emitido y verificado]"
+      }
+    },
+    {
+      "name": "Login",
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200,
+      "response": {
+        "message": "Inicio de sesión exitoso",
+        "user": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "email": "etapa2.demo@example.test",
+          "role": "user"
+        },
+        "access_token": "[JWT emitido y verificado]"
+      }
+    },
+    {
+      "name": "Credenciales inválidas",
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 401,
+      "response": {
+        "message": "Credenciales inválidas",
+        "error": "Unauthorized",
+        "statusCode": 401
+      }
+    },
+    {
+      "name": "Categoría sin JWT",
+      "method": "POST",
+      "path": "/categories",
+      "status": 401,
+      "response": {
+        "message": "Unauthorized",
+        "statusCode": 401
+      }
+    },
+    {
+      "name": "Categoría con JWT",
+      "method": "POST",
+      "path": "/categories",
+      "status": 201,
+      "response": {
+        "id": 1,
+        "name": "Demostración Etapa 2",
+        "description": "Datos locales para evidencias académicas"
+      }
+    },
+    {
+      "name": "Crear libro 1",
+      "method": "POST",
+      "path": "/books",
+      "status": 201,
+      "response": {
+        "id": 1,
+        "title": "NestJS para biblioteca",
+        "author": "Cuenta de demostración",
+        "isbn": "9780000000101",
+        "year": 2024,
+        "genre": "Tecnología",
+        "availableCopies": 3,
+        "categoryId": 1
+      }
+    },
+    {
+      "name": "Crear libro 2",
+      "method": "POST",
+      "path": "/books",
+      "status": 201,
+      "response": {
+        "id": 2,
+        "title": "PostgreSQL y relaciones",
+        "author": "Cuenta de demostración",
+        "isbn": "9780000000102",
+        "year": 2022,
+        "genre": "Tecnología",
+        "availableCopies": 3,
+        "categoryId": 1
+      }
+    },
+    {
+      "name": "Crear libro 3",
+      "method": "POST",
+      "path": "/books",
+      "status": 201,
+      "response": {
+        "id": 3,
+        "title": "Autenticación con JWT",
+        "author": "Cuenta de demostración",
+        "isbn": "9780000000103",
+        "year": 2025,
+        "genre": "Tecnología",
+        "availableCopies": 3,
+        "categoryId": 1
+      }
+    },
+    {
+      "name": "Actualizar categoría",
+      "method": "PATCH",
+      "path": "/categories/1",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Demostración Etapa 2",
+        "description": "Categoría vinculada a tres libros de prueba",
+        "books": [
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 2,
+            "title": "PostgreSQL y relaciones",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000102",
+            "year": 2022,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 3,
+            "title": "Autenticación con JWT",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000103",
+            "year": 2025,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Préstamo sin JWT",
+      "method": "POST",
+      "path": "/loans",
+      "status": 401,
+      "response": {
+        "message": "Unauthorized",
+        "statusCode": 401
+      }
+    },
+    {
+      "name": "Préstamo con JWT",
+      "method": "POST",
+      "path": "/loans",
+      "status": 201,
+      "response": {
+        "id": 1,
+        "book": {
+          "id": 1,
+          "title": "NestJS para biblioteca",
+          "author": "Cuenta de demostración",
+          "isbn": "9780000000101",
+          "year": 2024,
+          "genre": "Tecnología",
+          "availableCopies": 2,
+          "categoryId": 1
+        },
+        "user": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "email": "etapa2.demo@example.test",
+          "role": "user",
+          "createdAt": "2026-10-12T02:15:06.961Z"
+        },
+        "loanDate": "2026-10-12T02:15:07.235Z",
+        "returnDate": null,
+        "status": "active"
+      }
+    },
+    {
+      "name": "Libro tras préstamo",
+      "method": "GET",
+      "path": "/books/1",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "title": "NestJS para biblioteca",
+        "author": "Cuenta de demostración",
+        "isbn": "9780000000101",
+        "year": 2024,
+        "genre": "Tecnología",
+        "availableCopies": 2,
+        "categoryId": 1,
+        "category": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "description": "Categoría vinculada a tres libros de prueba"
+        }
+      }
+    },
+    {
+      "name": "Consulta relacionada",
+      "method": "GET",
+      "path": "/categories/1",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Demostración Etapa 2",
+        "description": "Categoría vinculada a tres libros de prueba",
+        "books": [
+          {
+            "id": 2,
+            "title": "PostgreSQL y relaciones",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000102",
+            "year": 2022,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 3,
+            "title": "Autenticación con JWT",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000103",
+            "year": 2025,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 2,
+            "categoryId": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Préstamos del libro",
+      "method": "GET",
+      "path": "/books/1/loans",
+      "status": 200,
+      "response": [
+        {
+          "id": 1,
+          "user": {
+            "id": 1,
+            "name": "Demostración Etapa 2",
+            "email": "etapa2.demo@example.test",
+            "role": "user",
+            "createdAt": "2026-10-12T02:15:06.961Z"
+          },
+          "loanDate": "2026-10-12T02:15:07.235Z",
+          "returnDate": null,
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "name": "Filtro",
+      "method": "GET",
+      "path": "/books?search=NestJS&categoryId=1",
+      "status": 200,
+      "response": {
+        "items": [
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 2,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          }
+        ],
+        "meta": {
+          "total": 1,
+          "page": 1,
+          "limit": 10,
+          "totalPages": 1
+        }
+      }
+    },
+    {
+      "name": "Página 1",
+      "method": "GET",
+      "path": "/books?page=1&limit=2&sortBy=year&order=DESC",
+      "status": 200,
+      "response": {
+        "items": [
+          {
+            "id": 3,
+            "title": "Autenticación con JWT",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000103",
+            "year": 2025,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          },
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 2,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          }
+        ],
+        "meta": {
+          "total": 3,
+          "page": 1,
+          "limit": 2,
+          "totalPages": 2
+        }
+      }
+    },
+    {
+      "name": "Página 2",
+      "method": "GET",
+      "path": "/books?page=2&limit=2&sortBy=year&order=DESC",
+      "status": 200,
+      "response": {
+        "items": [
+          {
+            "id": 2,
+            "title": "PostgreSQL y relaciones",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000102",
+            "year": 2022,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          }
+        ],
+        "meta": {
+          "total": 3,
+          "page": 2,
+          "limit": 2,
+          "totalPages": 2
+        }
+      }
+    },
+    {
+      "name": "Orden sin paginación explícita",
+      "method": "GET",
+      "path": "/books?sortBy=year&order=DESC",
+      "status": 200,
+      "response": {
+        "items": [
+          {
+            "id": 3,
+            "title": "Autenticación con JWT",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000103",
+            "year": 2025,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          },
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 2,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          },
+          {
+            "id": 2,
+            "title": "PostgreSQL y relaciones",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000102",
+            "year": 2022,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1,
+            "category": {
+              "id": 1,
+              "name": "Demostración Etapa 2",
+              "description": "Categoría vinculada a tres libros de prueba"
+            }
+          }
+        ],
+        "meta": {
+          "total": 3,
+          "page": 1,
+          "limit": 10,
+          "totalPages": 1
+        }
+      }
+    },
+    {
+      "name": "Página inválida",
+      "method": "GET",
+      "path": "/books?page=0",
+      "status": 400,
+      "response": {
+        "message": [
+          "page debe ser mayor o igual a 1"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "name": "Devolución",
+      "method": "PATCH",
+      "path": "/loans/1/return",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "book": {
+          "id": 1,
+          "title": "NestJS para biblioteca",
+          "author": "Cuenta de demostración",
+          "isbn": "9780000000101",
+          "year": 2024,
+          "genre": "Tecnología",
+          "availableCopies": 2,
+          "categoryId": 1
+        },
+        "user": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "email": "etapa2.demo@example.test",
+          "role": "user",
+          "createdAt": "2026-10-12T02:15:06.961Z"
+        },
+        "loanDate": "2026-10-12T02:15:07.235Z",
+        "returnDate": "2026-10-12T02:15:07.338Z",
+        "status": "returned"
+      }
+    },
+    {
+      "name": "Copias tras devolución",
+      "method": "GET",
+      "path": "/books/1",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "title": "NestJS para biblioteca",
+        "author": "Cuenta de demostración",
+        "isbn": "9780000000101",
+        "year": 2024,
+        "genre": "Tecnología",
+        "availableCopies": 3,
+        "categoryId": 1,
+        "category": {
+          "id": 1,
+          "name": "Demostración Etapa 2",
+          "description": "Categoría vinculada a tres libros de prueba"
+        }
+      }
+    },
+    {
+      "name": "Contraseña almacenada",
+      "bcrypt": true,
+      "plaintext": false
+    },
+    {
+      "name": "Claves foráneas",
+      "rows": [
+        {
+          "tabla": "books",
+          "regla": "FOREIGN KEY (\"categoryId\") REFERENCES categories(id) ON DELETE SET NULL"
+        },
+        {
+          "tabla": "enrollments",
+          "regla": "FOREIGN KEY (\"studentId\") REFERENCES students(id) ON DELETE CASCADE"
+        },
+        {
+          "tabla": "enrollments",
+          "regla": "FOREIGN KEY (\"courseId\") REFERENCES courses(id) ON DELETE CASCADE"
+        },
+        {
+          "tabla": "loans",
+          "regla": "FOREIGN KEY (\"bookId\") REFERENCES books(id) ON DELETE RESTRICT"
+        },
+        {
+          "tabla": "loans",
+          "regla": "FOREIGN KEY (\"userId\") REFERENCES users(id) ON DELETE CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "Migraciones",
+      "rows": [
+        {
+          "name": "InitialRelationalAndAuthSchema1728670000000"
+        },
+        {
+          "name": "UpgradeStageOneSchema1791676800000"
+        }
+      ]
+    },
+    {
+      "name": "Relación después de reiniciar",
+      "method": "GET",
+      "path": "/categories/1",
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Demostración Etapa 2",
+        "description": "Categoría vinculada a tres libros de prueba",
+        "books": [
+          {
+            "id": 2,
+            "title": "PostgreSQL y relaciones",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000102",
+            "year": 2022,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 3,
+            "title": "Autenticación con JWT",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000103",
+            "year": 2025,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          },
+          {
+            "id": 1,
+            "title": "NestJS para biblioteca",
+            "author": "Cuenta de demostración",
+            "isbn": "9780000000101",
+            "year": 2024,
+            "genre": "Tecnología",
+            "availableCopies": 3,
+            "categoryId": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "Reinicio",
+      "oldPid": 24292,
+      "newPid": 7408
+    }
+  ]
+}
