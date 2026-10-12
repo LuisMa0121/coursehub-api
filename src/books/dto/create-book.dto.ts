@@ -2,6 +2,7 @@ import { Transform } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   Max,
@@ -41,4 +42,9 @@ export class CreateBookDto {
   @IsInt({ message: 'availableCopies debe ser un número entero' })
   @Min(0, { message: 'availableCopies no puede ser negativo' })
   availableCopies: number;
+
+  @IsOptional()
+  @IsInt({ message: 'categoryId debe ser un número entero' })
+  @Min(1, { message: 'categoryId debe ser mayor a 0' })
+  categoryId?: number;
 }

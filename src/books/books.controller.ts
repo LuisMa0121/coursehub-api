@@ -7,8 +7,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { BooksService } from './books.service.js';
+import { BooksQueryDto } from './dto/books-query.dto.js';
 import { CreateBookDto } from './dto/create-book.dto.js';
 import { UpdateBookDto } from './dto/update-book.dto.js';
 
@@ -22,8 +24,8 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  findAll(@Query() query: BooksQueryDto) {
+    return this.booksService.findAll(query);
   }
 
   @Get(':id')

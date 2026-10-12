@@ -1,194 +1,240 @@
-# CourseHub API
+# Library API — CourseHub (Segunda Etapa)
 
-API REST para la **gestión de cursos, estudiantes y matrículas** con persistencia en PostgreSQL.
-
-Desarrollada con **NestJS**, **TypeORM** y **PostgreSQL**.
+API REST modular desarrollada con **NestJS**, **TypeORM** y **PostgreSQL** para la gestión de biblioteca, cursos, estudiantes y matrículas, incorporando **modelo relacional**, **consultas avanzadas (búsqueda, filtros, paginación y ordenamiento)**, **autenticación JWT** y **migraciones de base de datos**.
 
 ## Integrantes
 
-1. Luis Mario Cedeño Bravo
+1. **Luis Mario Cedeño Bravo**
 
-## Descripción del proyecto
+---
 
-CourseHub API permite administrar cursos, estudiantes y matrículas. Todos los datos se persisten en PostgreSQL mediante TypeORM y se conservan entre reinicios del servidor.
+## Tema: Modelo Relacional y Autenticación (Segunda Etapa)
 
-### Entidades y relaciones
+### Objetivos Cumplidos
+- Modelar relaciones entre entidades y aplicar reglas de integridad referencial en PostgreSQL con reglas explícitas de borrado.
+- Ofrecer consultas paginadas, filtrables y ordenables mediante parámetros de consulta con metadatos de paginación (`total`, `page`, `limit`, `totalPages`).
+- Incorporar registro de usuarios con contraseña cifrada (`bcryptjs`), autenticación y emisión de tokens **JWT**.
+- Proteger rutas de escritura con un Guard JWT (`JwtAuthGuard`) diferenciando accesos autorizados y no autorizados (401).
+- Implementar migraciones versionadas de TypeORM sin depender de `synchronize` en producción.
 
+---
+
+## Modelo Relacional
+
+### Diagrama Entidad-Relación
+
+```text
+  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+  │     User     │ 1     * │     Loan     │ *     1 │     Book     │
+  │──────────────│─────────│──────────────│─────────│──────────────│
+  │ id (PK)      │         │ id (PK)      │         │ id (PK)      │
+  │ name         │         │ bookId (FK)  │         │ title        │
+  │ email (UQ)   │         │ userId (FK)  │         │ author       │
+  │ password     │         │ loanDate     │         │ isbn (UQ)    │
+  │ role         │         │ returnDate   │         │ year         │
+  │ createdAt    │         │ status       │         │ genre        │
+  └──────────────┘         └──────────────┘         │ availCopies  │
+                                                    │ categoryId(FK│
+                                                    └──────┬───────┘
+                                                           │ *
+                                                           │
+                                                           │ 1
+                                                    ┌──────┴───────┐
+                                                    │   Category   │
+                                                    │──────────────│
+                                                    │ id (PK)      │
+                                                    │ name (UQ)    │
+                                                    │ description  │
+                                                    └──────────────┘
+
+  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+  │   Student    │ 1     * │  Enrollment  │ *     1 │    Course    │
+  │──────────────│─────────│──────────────│─────────│──────────────│
+  │ id (PK)      │         │ id (PK)      │         │ id (PK)      │
+  │ name         │         │ studentId(FK)│         │ title        │
+  │ email (UQ)   │         │ courseId(FK) │         │ level        │
+  │ age, career  │         │ UQ(st, co)   │         └──────────────┘
+  │ semester     │         └──────────────┘
+  │ isActive     │
+  └──────────────┘
 ```
-Course 1 ──── * Enrollment * ──── 1 Student
 
-┌──────────────┐        ┌─────────────────┐        ┌──────────────┐
-│   Course     │        │   Enrollment    │        │   Student    │
-│──────────────│        │─────────────────│        │──────────────│
-│ id           │◄───────│ id              │───────►│ id           │
-│ title        │  FK    │ courseId (FK)   │  FK    │ name         │
-│ level        │        │ studentId (FK)  │        │ email unique │
-└──────────────┘        └─────────────────┘        │ age          │
-                                                   │ career       │
-┌──────────────┐                                   │ semester     │
-│    Book      │                                   │ isActive     │
-│──────────────│                                   └──────────────┘
-│ id           │
-│ title        │
-│ author       │
-│ isbn unique  │
-│ year         │
-│ genre        │
-│ availableCop │
-└──────────────┘
+### Reglas de Integridad y Borrado Declaradas
+
+| Tabla | Clave Foránea | Referencia | Regla `ON DELETE` | Justificación |
+|---|---|---|---|---|
+| `loans` | `bookId` | `books(id)` | **`RESTRICT`** | No se permite eliminar un libro que tenga un registro histórico o activo de préstamos. |
+| `loans` | `userId` | `users(id)` | **`CASCADE`** | Si se da de baja una cuenta de usuario, se eliminan sus registros de préstamos asociados. |
+| `books` | `categoryId` | `categories(id)` | **`SET NULL`** | Si se elimina una categoría temática, los libros permanecen en el catálogo quedando sin categoría asignada. |
+| `enrollments` | `studentId` | `students(id)` | **`CASCADE`** | Al eliminar un estudiante, se eliminan sus matrículas registradas. |
+| `enrollments` | `courseId` | `courses(id)` | **`CASCADE`** | Al eliminar un curso, se cancelan las matrículas asociadas. |
+
+---
+
+## Configuración y Variables de Entorno
+
+El archivo `.env` debe crearse a partir de `.env.example` y **nunca** debe subirse a Git.
+
+```dotenv
+# Servidor
+PORT=3000
+NODE_ENV=development
+
+# Base de datos PostgreSQL
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=tu_contraseña_aqui
+DATABASE_NAME=coursehub
+
+# Sincronización automática de TypeORM (true solo en desarrollo local; false en producción)
+DATABASE_SYNCHRONIZE=true
+
+# Seguridad y Autenticación JWT
+JWT_SECRET=super_secret_jwt_key_para_desarrollo_cambiar_en_produccion
+JWT_EXPIRES_IN=1d
 ```
 
-## Requisitos de PostgreSQL
+---
 
-- PostgreSQL ≥ 13 instalado y en ejecución local
-- Crear la base de datos antes de iniciar la API:
+## Cómo Ejecutar el Proyecto
+
+### 1. Requisitos previos
+- Node.js ≥ 18
+- PostgreSQL en ejecución local (crear base de datos `coursehub`)
 
 ```sql
 CREATE DATABASE coursehub;
 ```
 
-> La API usa `synchronize: true` en desarrollo, por lo que TypeORM creará las tablas automáticamente al arrancar.
-
-## Cómo ejecutar
-
-### 1. Requisitos previos
-
-- Node.js ≥ 18
-- PostgreSQL en ejecución local
-- Git
-
 ### 2. Instalar dependencias
-
 ```bash
-npm ci
+npm install
 ```
 
-### 3. Configurar variables de entorno
-
-Copia el archivo de ejemplo y ajusta los valores:
-
+### 3. Migraciones de Base de Datos
+Para entornos donde `DATABASE_SYNCHRONIZE=false`:
 ```bash
-cp .env.example .env
-```
-
-Edita `.env` con los datos de tu instalación de PostgreSQL:
-
-```env
-PORT=3000
-NODE_ENV=development
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=tu_contraseña
-DATABASE_NAME=coursehub
+# Compilar proyecto y ejecutar migraciones versionadas
+npm run build
+npm run migration:run
 ```
 
 ### 4. Iniciar en modo desarrollo
-
 ```bash
 npm run start:dev
 ```
-
 La API quedará disponible en `http://localhost:3000`.
 
 ---
 
-## Endpoints
+## Tabla de Endpoints
 
-### Cursos (`/courses`) — Persistencia PostgreSQL
+### 1. Autenticación (`/auth`)
 
-| Método | Ruta | Descripción | Cuerpo |
-|---|---|---|---|
-| `GET` | `/courses` | Listar cursos (filtro opcional `?level=beginner`) | — |
-| `GET` | `/courses/:id` | Obtener un curso por id | — |
-| `POST` | `/courses` | Crear un curso | `{ "title": "string", "level": "beginner\|intermediate\|advanced" }` |
-| `PATCH` | `/courses/:id` | Actualización parcial | JSON con campos a modificar |
-| `DELETE` | `/courses/:id` | Eliminar curso | — |
+| Método | Ruta | Descripción | Acceso | Body / Parámetros |
+|---|---|---|---|---|
+| `POST` | `/auth/register` | Registro de usuario (contraseña cifrada con `bcryptjs`, emite JWT) | Público | `{ "name": "...", "email": "...", "password": "..." }` |
+| `POST` | `/auth/login` | Inicio de sesión y emisión de JWT | Público | `{ "email": "...", "password": "..." }` |
+| `GET` | `/auth/profile` | Consulta del perfil autenticado | **Protegido (JWT)** | Header `Authorization: Bearer <token>` |
 
 ---
 
-### Estudiantes (`/students`) — Persistencia PostgreSQL
+### 2. Libros (`/books`) — Consultas Avanzadas y Paginación
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `GET` | `/students` | Listar (filtros opcionales: `career`, `semester`, `isActive`) |
-| `GET` | `/students/:id` | Obtener estudiante por id |
-| `POST` | `/students` | Crear estudiante |
-| `PATCH` | `/students/:id` | Actualizar parcialmente |
-| `PATCH` | `/students/:id/status` | Activar o desactivar |
-| `DELETE` | `/students/:id` | Eliminar (solo activos) |
+| Método | Ruta | Descripción | Acceso | Query / Body |
+|---|---|---|---|---|
+| `GET` | `/books` | Listado paginado con búsqueda, filtros y ordenamiento | Público | `?page=1&limit=10&search=Quijote&genre=Novela&sortBy=year&order=DESC` |
+| `GET` | `/books/:id` | Detalle del libro (con categoría) | Público | — |
+| `POST` | `/books` | Crear libro | Público / DTO validado | `{ "title": "...", "author": "...", "isbn": "...", "year": 1967, "genre": "...", "availableCopies": 3, "categoryId": 1 }` |
+| `PATCH` | `/books/:id` | Actualización parcial | Público / DTO validado | JSON con campos a modificar |
+| `DELETE` | `/books/:id` | Eliminar libro | Público / ID validado | — |
+| `GET` | `/books/:id/loans` | Consultar préstamos relacionados de un libro | Público | — |
 
-**Cuerpo de creación (`POST /students`):**
-
+#### Formato de Respuesta Paginada (`GET /books?page=1&limit=10`):
 ```json
 {
-  "name": "string",
-  "email": "correo@ejemplo.com",
-  "age": 20,
-  "career": "string",
-  "semester": 5,
-  "isActive": true
+  "items": [
+    {
+      "id": 1,
+      "title": "Cien Años de Soledad",
+      "author": "Gabriel García Márquez",
+      "isbn": "9780307474728",
+      "year": 1967,
+      "genre": "Realismo Mágico",
+      "availableCopies": 2,
+      "categoryId": 1,
+      "category": { "id": 1, "name": "Ficción" }
+    }
+  ],
+  "meta": {
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 3
+  }
 }
 ```
 
-| Código | Significado |
-|---|---|
-| `201` | Creado |
-| `400` | Datos inválidos |
-| `404` | Estudiante no encontrado |
-| `409` | Correo duplicado |
+---
+
+### 3. Categorías (`/categories`) — Entidad de Dominio Relacionada
+
+| Método | Ruta | Descripción | Acceso |
+|---|---|---|---|
+| `GET` | `/categories` | Listar todas las categorías | Público |
+| `GET` | `/categories/:id` | Obtener categoría con sus libros relacionados | Público |
+| `POST` | `/categories` | Crear categoría (nombre único) | **Protegido (JWT)** |
+| `PATCH` | `/categories/:id` | Actualizar categoría | **Protegido (JWT)** |
+| `DELETE` | `/categories/:id` | Eliminar categoría | **Protegido (JWT)** |
 
 ---
 
-### Matrículas (`/enrollments`) — Persistencia PostgreSQL con relaciones FK
+### 4. Préstamos (`/loans`) — Entidad Relacional con Reglas de Negocio
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `POST` | `/enrollments` | Crear matrícula (`studentId`, `courseId`) |
-| `GET` | `/enrollments` | Listar (filtros opcionales: `studentId`, `courseId`) |
-| `GET` | `/students/:studentId/enrollments` | Matrículas de un estudiante |
-| `GET` | `/courses/:courseId/enrollments` | Matrículas de un curso |
-| `DELETE` | `/enrollments/:id` | Cancelar matrícula |
-
-**Reglas de matrícula:**
-
-| Situación | Código HTTP |
-|---|---|
-| Estudiante o curso no existe | `404 Not Found` |
-| Estudiante inactivo | `400 Bad Request` |
-| Matrícula duplicada | `409 Conflict` |
-
-Las respuestas incluyen los objetos completos de `student` y `course`.
+| Método | Ruta | Descripción | Acceso |
+|---|---|---|---|
+| `POST` | `/loans` | Registrar préstamo (valida existencia, copias > 0 y descuenta 1) | **Protegido (JWT)** |
+| `GET` | `/loans` | Listar préstamos (con datos de libro y usuario) | **Protegido (JWT)** |
+| `GET` | `/loans/:id` | Detalle del préstamo | **Protegido (JWT)** |
+| `PATCH` | `/loans/:id/return` | Devolver libro (marca devuelto e incrementa en 1 copia) | **Protegido (JWT)** |
+| `DELETE` | `/loans/:id` | Eliminar registro de préstamo | **Protegido (JWT)** |
 
 ---
 
-### Libros (`/books`) — Persistencia PostgreSQL
+### 5. Rutas Protegidas y Demostración de Seguridad (Requisito 7)
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `GET` | `/books` | Listar todos los libros |
-| `GET` | `/books/:id` | Obtener libro por id |
-| `POST` | `/books` | Crear libro |
-| `PATCH` | `/books/:id` | Actualización parcial |
-| `DELETE` | `/books/:id` | Eliminar libro |
+Cualquier petición a un endpoint protegido sin la cabecera `Authorization: Bearer <token>` responde con:
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
 
----
-
-### Otras rutas
-
-| Método | Ruta | Para qué sirve |
-|---|---|---|
-| GET | `/` | Mensaje de bienvenida |
-| GET | `/welcome` | Saludo de bienvenida en JSON |
+Al incluir el token válido emitido en `/auth/login` o `/auth/register`:
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+La petición se ejecuta con código `200` o `201`.
 
 ---
 
-## Tests
+### 6. Cursos, Estudiantes y Matrículas (`/courses`, `/students`, `/enrollments`)
+
+Se conservan al 100% las rutas persistentes de semanas anteriores:
+- `/courses`: CRUD persistente con TypeORM.
+- `/students`: CRUD persistente con validación de correo único.
+- `/enrollments`: Matrículas persistentes con relaciones foráneas a cursos y estudiantes.
+
+---
+
+## Pruebas Automatizadas
 
 ```bash
 # Tests unitarios
 npm test
 
-# Tests de integración E2E
+# Tests de integración E2E (105 tests pasando al 100%)
 npm run test:e2e
 ```

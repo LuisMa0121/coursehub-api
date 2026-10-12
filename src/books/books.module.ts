@@ -8,5 +8,6 @@ import { BooksService } from './books.service.js';
   imports: [TypeOrmModule.forFeature([Book])],
   controllers: [BooksController],
   providers: [BooksService],
+  exports: [BooksService],
 })
 export class BooksModule {}
