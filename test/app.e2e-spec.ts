@@ -1,40 +1,40 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import type { Server } from 'node:http';
 import { TestAppModule } from './test-app.module.js';
 import { configureApp } from '../src/setup-app.js';
 
-const seedCourses = [
-  { title: 'NestJS Fundamentals', level: 'beginner' },
-  { title: 'REST APIs with NestJS', level: 'beginner' },
-  { title: 'NestJS Architecture', level: 'intermediate' },
-];
-
-async function createApplication(): Promise<INestApplication<Server>> {
+async function createApplication(): Promise<INestApplication> {
   const module = await Test.createTestingModule({
     imports: [TestAppModule],
   }).compile();
-  const app = module.createNestApplication<INestApplication<Server>>();
+  const app = module.createNestApplication();
   configureApp(app);
   await app.init();
   return app;
 }
 
-async function seedDatabase(app: INestApplication<Server>) {
-  const created: { id: number; title: string; level: string }[] = [];
-  for (const course of seedCourses) {
+async function seedDatabase(
+  app: INestApplication,
+): Promise<{ id: number; title: string; level: string }[]> {
+  const seeds = [
+    { title: 'NestJS Fundamentals', level: 'beginner' },
+    { title: 'REST APIs with NestJS', level: 'beginner' },
+    { title: 'NestJS Architecture', level: 'intermediate' },
+  ];
+  const courses: { id: number; title: string; level: string }[] = [];
+  for (const seed of seeds) {
     const res = await request(app.getHttpServer())
       .post('/courses')
-      .send(course)
+      .send(seed)
       .expect(201);
-    created.push(res.body);
+    courses.push(res.body);
   }
-  return created;
+  return courses;
 }
 
-describe('CourseHub API (HTTP)', () => {
-  let app: INestApplication<Server>;
+describe('CourseHub API (persistencia con SQLite en memoria)', () => {
+  let app: INestApplication;
   let initialCourses: { id: number; title: string; level: string }[];
 
   beforeEach(async () => {
@@ -58,24 +58,27 @@ describe('CourseHub API (HTTP)', () => {
   });
 
   it('GET /courses devuelve los tres cursos iniciales', async () => {
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .get('/courses')
-      .expect(200)
-      .expect(initialCourses);
+      .expect(200);
+    expect(res.body.items).toEqual(initialCourses);
+    expect(res.body.meta.total).toBe(3);
   });
 
   it.each(['beginner', 'intermediate', 'advanced', 'expert'])(
     'GET /courses?level=%s filtra sin alterar los datos',
     async (level) => {
-      await request(app.getHttpServer())
+      const res = await request(app.getHttpServer())
         .get('/courses')
         .query({ level })
-        .expect(200)
-        .expect(initialCourses.filter((course) => course.level === level));
-      await request(app.getHttpServer())
+        .expect(200);
+      expect(res.body.items).toEqual(
+        initialCourses.filter((course) => course.level === level),
+      );
+      const resAll = await request(app.getHttpServer())
         .get('/courses')
-        .expect(200)
-        .expect(initialCourses);
+        .expect(200);
+      expect(resAll.body.items).toEqual(initialCourses);
     },
   );
 
@@ -100,10 +103,10 @@ describe('CourseHub API (HTTP)', () => {
         .get(`/courses/${created.body.id}`)
         .expect(200)
         .expect(created.body);
-      await request(app.getHttpServer())
+      const resCourses = await request(app.getHttpServer())
         .get('/courses')
-        .expect(200)
-        .expect([...initialCourses, created.body]);
+        .expect(200);
+      expect(resCourses.body.items).toEqual([...initialCourses, created.body]);
     },
   );
 
@@ -137,10 +140,10 @@ describe('CourseHub API (HTTP)', () => {
       expect(response.body.message).toEqual(
         expect.arrayContaining([expect.stringContaining(field)]),
       );
-      await request(app.getHttpServer())
+      const resCourses = await request(app.getHttpServer())
         .get('/courses')
-        .expect(200)
-        .expect(initialCourses);
+        .expect(200);
+      expect(resCourses.body.items).toEqual(initialCourses);
       const valid = await request(app.getHttpServer())
         .post('/courses')
         .send({ title: 'Siguiente curso válido', level: 'beginner' })
@@ -161,25 +164,24 @@ describe('CourseHub API (HTTP)', () => {
       .get(`/courses/${courseId}`)
       .expect(200)
       .expect(expected);
-    await request(app.getHttpServer())
+    const resFiltered = await request(app.getHttpServer())
       .get('/courses?level=advanced')
-      .expect(200)
-      .expect([expected]);
+      .expect(200);
+    expect(resFiltered.body.items).toEqual([expected]);
   });
 
   it('PATCH solo title preserva level y PATCH vacío conserva el curso', async () => {
-    const courseId = initialCourses[0].id;
-    const expected = { ...initialCourses[0], title: 'Título actualizado' };
+    const courseId = initialCourses[1].id;
     await request(app.getHttpServer())
       .patch(`/courses/${courseId}`)
-      .send({ title: expected.title })
+      .send({ title: 'Título actualizado' })
       .expect(200)
-      .expect(expected);
+      .expect({ ...initialCourses[1], title: 'Título actualizado' });
     await request(app.getHttpServer())
       .patch(`/courses/${courseId}`)
       .send({})
       .expect(200)
-      .expect(expected);
+      .expect({ ...initialCourses[1], title: 'Título actualizado' });
   });
 
   it.each([
@@ -233,10 +235,10 @@ describe('CourseHub API (HTTP)', () => {
         .delete(`/courses/${id}`)
         .expect(404)
         .expect(expected);
-      await request(app.getHttpServer())
+      const resCourses = await request(app.getHttpServer())
         .get('/courses')
-        .expect(200)
-        .expect(initialCourses);
+        .expect(200);
+      expect(resCourses.body.items).toEqual(initialCourses);
     },
   );
 
@@ -248,10 +250,10 @@ describe('CourseHub API (HTTP)', () => {
       .expect(initialCourses[1]);
     await request(app.getHttpServer()).get(`/courses/${courseId}`).expect(404);
     await request(app.getHttpServer()).delete(`/courses/${courseId}`).expect(404);
-    await request(app.getHttpServer())
+    const resCourses = await request(app.getHttpServer())
       .get('/courses')
-      .expect(200)
-      .expect([initialCourses[0], initialCourses[2]]);
+      .expect(200);
+    expect(resCourses.body.items).toEqual([initialCourses[0], initialCourses[2]]);
   });
 
   it('POST no reutiliza ids después de borrar un curso', async () => {
@@ -269,7 +271,7 @@ describe('CourseHub API (HTTP)', () => {
 
     expect(second.body.id).toBeGreaterThan(first.body.id);
     const all = await request(app.getHttpServer()).get('/courses').expect(200);
-    const ids = all.body.map((course: { id: number }) => course.id);
+    const ids = all.body.items.map((course: { id: number }) => course.id);
     expect(new Set(ids).size).toBe(ids.length);
     await request(app.getHttpServer())
       .get(`/courses/${first.body.id}`)
@@ -292,12 +294,11 @@ describe('CourseHub API (HTTP)', () => {
 
     const restarted = await createApplication();
     try {
-      // Con TypeORM + dropSchema:true, la nueva app arranca con BD vacía → re-siembra
       const freshCourses = await seedDatabase(restarted);
-      await request(restarted.getHttpServer())
+      const resCourses = await request(restarted.getHttpServer())
         .get('/courses')
-        .expect(200)
-        .expect(freshCourses);
+        .expect(200);
+      expect(resCourses.body.items).toEqual(freshCourses);
       const created = await request(restarted.getHttpServer())
         .post('/courses')
         .send({ title: 'Primer curso tras reiniciar', level: 'beginner' })

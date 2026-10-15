@@ -98,7 +98,7 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
       const response = await request(app.getHttpServer())
         .get('/enrollments' + query)
         .expect(200);
-      expect(response.body.map((item: { id: number }) => item.id)).toEqual(ids);
+      expect(response.body.items.map((item: { id: number }) => item.id)).toEqual(ids);
     }
 
     const byStudent = await request(app.getHttpServer())
@@ -130,10 +130,10 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
     await enroll(inactive).expect(400); // estudiante inactivo → 400
     await enroll(999).expect(404);
     await enroll(active, 999).expect(404);
-    await request(app.getHttpServer())
+    const emptyRes = await request(app.getHttpServer())
       .get('/enrollments')
-      .expect(200)
-      .expect([]);
+      .expect(200);
+    expect(emptyRes.body.items).toEqual([]);
     const res = await enroll(active).expect(201);
     expect(res.body.id).toBe(1);
     expect(res.body.student.id).toBe(active);
@@ -178,10 +178,10 @@ describe('Integración de Cursos, Estudiantes y Matrículas', () => {
       .post('/enrollments')
       .send(body)
       .expect(400);
-    await request(app.getHttpServer())
+    const emptyRes = await request(app.getHttpServer())
       .get('/enrollments')
-      .expect(200)
-      .expect([]);
+      .expect(200);
+    expect(emptyRes.body.items).toEqual([]);
   });
 
   it.each([

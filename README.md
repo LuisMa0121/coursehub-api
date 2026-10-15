@@ -222,10 +222,73 @@ La petición se ejecuta con código `200` o `201`.
 
 ### 6. Cursos, Estudiantes y Matrículas (`/courses`, `/students`, `/enrollments`)
 
-Se conservan las rutas persistentes de semanas anteriores:
-- `/courses`: CRUD persistente con TypeORM.
-- `/students`: CRUD persistente con validación de correo único.
-- `/enrollments`: Matrículas persistentes con relaciones foráneas a cursos y estudiantes.
+#### Semana 6: Paginación, Filtros y Búsqueda con QueryBuilder
+
+##### A. Cursos (`GET /courses`)
+Consulta paginada, filtrable por nivel y ordenable con `findAndCount` de TypeORM.
+- **Parámetros disponibles:**
+  - `level`: `beginner` | `intermediate` | `advanced` | `expert`
+  - `page`: Número entero ≥ 1 (predeterminado: `1`)
+  - `limit`: Número entero entre 1 y 50 (predeterminado: `10`)
+  - `sortBy`: Campo para ordenar: `id`, `title` o `level` (predeterminado: `id`)
+  - `order`: Sentido del orden: `ASC` o `DESC` (predeterminado: `ASC`)
+- **Respuesta estándar:**
+  ```json
+  {
+    "items": [
+      { "id": 1, "title": "NestJS Fundamentals", "level": "beginner" }
+    ],
+    "meta": {
+      "total": 3,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  }
+  ```
+
+##### B. Matrículas (`GET /enrollments`)
+Consulta avanzada construida con `createQueryBuilder('enrollment')` con `leftJoinAndSelect` sobre `student` y `course`.
+- **Parámetros disponibles:**
+  - `search`: Texto para búsqueda parcial insensible a mayúsculas (case-insensitive) sobre el nombre del estudiante (`student.name`) o el título del curso (`course.title`).
+  - `studentId`: Entero positivo (ID del estudiante).
+  - `courseId`: Entero positivo (ID del curso).
+  - `activeOnly`: Booleano en texto (`true` o `false`), filtra matrículas cuyo estudiante tenga `student.isActive = true`.
+  - `page`: Número entero ≥ 1 (predeterminado: `1`)
+  - `limit`: Número entero entre 1 y 50 (predeterminado: `10`)
+- **Orden:** `enrollment.id ASC`.
+- **Respuesta estándar:**
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "studentId": 1,
+        "courseId": 1,
+        "student": { "id": 1, "name": "Ana Gómez", "email": "ana@example.com", "isActive": true },
+        "course": { "id": 1, "title": "NestJS Fundamentals", "level": "beginner" }
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  }
+  ```
+
+##### URLs de Ejemplo Probadas (Semana 6)
+1. **Paginación y ordenamiento de cursos por título ascendente:**
+   `GET /courses?page=1&limit=5&sortBy=title&order=ASC`
+2. **Filtrado de cursos por nivel con orden descendente:**
+   `GET /courses?level=beginner&page=1&limit=10&sortBy=level&order=DESC`
+3. **Búsqueda insensible a mayúsculas en matrículas por texto de curso o estudiante:**
+   `GET /enrollments?search=NestJS&page=1&limit=5`
+4. **Filtro combinado de búsqueda, estudiante activo y curso específico con paginación:**
+   `GET /enrollments?search=Ana&activeOnly=true&courseId=1&page=1&limit=10`
+5. **Filtrado de matrículas por estudiante y curso específicos:**
+   `GET /enrollments?studentId=1&courseId=2&page=1&limit=10`
 
 ---
 
@@ -235,7 +298,7 @@ Se conservan las rutas persistentes de semanas anteriores:
 # Tests unitarios
 npm test
 
-# Tests de integración E2E (108 pruebas E2E)
+# Tests de integración E2E (130 pruebas E2E)
 npm run test:e2e
 ```
 

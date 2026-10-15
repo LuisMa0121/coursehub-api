@@ -18,10 +18,14 @@ describe('CoursesService', () => {
     nextId = 4;
 
     const mockRepo = {
-      find: vi.fn().mockImplementation((options?: { where?: { level?: string } }) => {
+      findAndCount: vi.fn().mockImplementation((options?: { where?: { level?: string }; order?: Record<string, 'ASC' | 'DESC'>; skip?: number; take?: number }) => {
         const level = options?.where?.level;
-        if (!level) return Promise.resolve([...items]);
-        return Promise.resolve(items.filter((item) => item.level === level));
+        let filtered = level ? items.filter((item) => item.level === level) : [...items];
+        const total = filtered.length;
+        const skip = options?.skip ?? 0;
+        const take = options?.take ?? 10;
+        filtered = filtered.slice(skip, skip + take);
+        return Promise.resolve([filtered, total]);
       }),
       findOneBy: vi.fn().mockImplementation(({ id }: { id: number }) => {
         return Promise.resolve(items.find((item) => item.id === id) ?? null);
@@ -48,11 +52,13 @@ describe('CoursesService', () => {
 
   it('empieza con tres cursos y filtra sin modificar la colección', async () => {
     const original = await service.findAll();
-    expect(original).toHaveLength(3);
-    expect(await service.findAll('beginner')).toEqual(
-      original.filter((course) => course.level === 'beginner'),
+    expect(original.items).toHaveLength(3);
+    const beginnerRes = await service.findAll('beginner');
+    expect(beginnerRes.items).toEqual(
+      items.filter((course) => course.level === 'beginner'),
     );
-    expect(await service.findAll('expert')).toEqual([]);
+    const expertRes = await service.findAll('expert');
+    expect(expertRes.items).toEqual([]);
     expect(await service.findAll()).toEqual(original);
   });
 
@@ -64,7 +70,7 @@ describe('CoursesService', () => {
     expect(removed).toEqual(first);
     expect(second.id).toBeGreaterThan(first.id);
     const all = await service.findAll();
-    expect(new Set(all.map((course) => course.id)).size).toBe(all.length);
+    expect(new Set(all.items.map((course) => course.id)).size).toBe(all.items.length);
     await expect(service.findOne(String(first.id))).rejects.toThrow(NotFoundException);
   });
 
@@ -97,8 +103,8 @@ describe('CoursesService', () => {
 
     expect(await service.remove('2')).toEqual(removed);
     const remaining = await service.findAll();
-    expect(remaining.map((course) => course.id)).toEqual([1, 3]);
+    expect(remaining.items.map((course) => course.id)).toEqual([1, 3]);
     await expect(service.remove('2')).rejects.toThrow(NotFoundException);
-    expect(await service.findAll()).toHaveLength(2);
+    expect((await service.findAll()).items).toHaveLength(2);
   });
 });
