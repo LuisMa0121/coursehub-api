@@ -59,3 +59,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Informes completos locales; los resúmenes se versionan
 /postman/resultado-newman*.json
+
+# Documentos locales de evidencia y capturas
+*.docx
+*.pdf
+docs/semana-*/
