@@ -292,13 +292,34 @@ Consulta avanzada construida con `createQueryBuilder('enrollment')` con `leftJoi
 
 ---
 
+### 7. Configuración por Ambientes (Semana 7)
+
+#### Validación con Joi y ConfigModule (Sesión 13 y 14)
+- **Esquema de validación en `AppModule`:**
+  - `PORT`: Número de puerto válido (1–65535, predeterminado `3000`).
+  - `NODE_ENV`: Restringido a `development`, `test` o `production` (predeterminado `development`).
+  - `DATABASE_HOST` / `DB_HOST`: Host de PostgreSQL (predeterminado `localhost`).
+  - `DATABASE_PORT` / `DB_PORT`: Puerto de PostgreSQL (predeterminado `5432`).
+  - `DATABASE_USER` / `DB_USER`: Usuario de base de datos.
+  - `DATABASE_PASSWORD` / `DB_PASSWORD`: Contraseña (permite cadena vacía en desarrollo local).
+  - `DATABASE_NAME` / `DB_NAME`: Nombre de la base de datos (predeterminado `coursehub`).
+  - `DATABASE_SYNCHRONIZE`: Booleano en texto (`true` o `false`).
+- **Arranque seguro con `getOrThrow`:**
+  - `main.ts` lee el puerto obligatorio mediante `config.getOrThrow<number>('PORT')`.
+  - Si falta una variable requerida o tiene formato inválido, la aplicación se detiene inmediatamente con un error descriptivo de Joi antes de intentar conectarse.
+- **Política de sincronización de base de datos:**
+  - `synchronize` solo puede ser `true` en entorno `development` si `DATABASE_SYNCHRONIZE=true`.
+  - En `NODE_ENV=production`, `synchronize` se evalúa siempre a `false`, protegiendo el esquema de producción.
+
+---
+
 ## Pruebas Automatizadas
 
 ```bash
-# Tests unitarios
+# Tests unitarios (9 pruebas)
 npm test
 
-# Tests de integración E2E (130 pruebas E2E)
+# Tests de integración E2E (141 pruebas E2E en 6 suites)
 npm run test:e2e
 ```
 
