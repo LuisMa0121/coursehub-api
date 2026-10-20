@@ -25,7 +25,7 @@ describe('Trabajo Autónomo Segunda Etapa - E2E Tests', () => {
   });
 
   describe('1. Autenticación y Registro (Requisito 6)', () => {
-    it('POST /auth/register - registra un nuevo usuario con contraseña cifrada y emite JWT', async () => {
+    it('POST /auth/register - registra un nuevo usuario con contraseña cifrada y respuesta segura', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/register')
         .send({
@@ -35,13 +35,13 @@ describe('Trabajo Autónomo Segunda Etapa - E2E Tests', () => {
         })
         .expect(201);
 
-      expect(res.body.access_token).toBeDefined();
-      expect(res.body.user).toBeDefined();
-      expect(res.body.user.email).toBe('luis@example.com');
-      expect(res.body.user.password).toBeUndefined(); // Nunca expone la contraseña
+      expect(res.body.id).toBeDefined();
+      expect(res.body.email).toBe('luis@example.com');
+      expect(res.body.createdAt).toBeDefined();
+      expect(res.body.password).toBeUndefined(); // Nunca expone la contraseña
+      expect(res.body.passwordHash).toBeUndefined();
 
-      userId = res.body.user.id;
-      userToken = res.body.access_token;
+      userId = res.body.id;
     });
 
     it('POST /auth/register - rechaza email duplicado con 409 Conflict', async () => {

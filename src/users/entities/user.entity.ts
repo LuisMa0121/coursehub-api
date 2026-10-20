@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,22 +11,16 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
-
   @Column({ unique: true })
   email: string;
 
-  @Column({ select: false })
-  password: string;
+  @Column({ name: 'password_hash', select: false })
+  passwordHash: string;
 
-  @Column({ default: 'user' })
-  role: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  createdAt: string;
+  @CreateDateColumn()
+  createdAt: Date;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @OneToMany('Loan', 'user')
-  loans: any[];
+  loans?: any[];
 }
