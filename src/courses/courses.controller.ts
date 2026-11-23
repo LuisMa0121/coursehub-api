@@ -8,11 +8,13 @@ import {
   Patch,
   Post,
   Query,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard.js';
-import { User } from '../users/entities/user.entity.js';
+import {
+  type Actor,
+  CurrentUser,
+} from '../auth/decorators/current-user.decorator.js';
 import { UpdateCourseUseCase } from './application/update-course.use-case.js';
 import { CoursesService } from './courses.service.js';
 import { CoursesQueryDto } from './dto/courses-query.dto.js';
@@ -50,13 +52,9 @@ export class CoursesController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCourseDto: UpdateCourseDto,
-    @Request() req: { user?: User },
+    @CurrentUser() actor: Actor | null,
   ) {
-    return this.updateCourse.execute({
-      courseId: id,
-      changes: updateCourseDto,
-      actor: req?.user ? { id: req.user.id, role: req.user.role } : null,
-    });
+    return this.updateCourse.execute(id, updateCourseDto, actor);
   }
 
   @Delete(':id')

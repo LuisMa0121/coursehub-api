@@ -316,12 +316,29 @@ Consulta avanzada construida con `createQueryBuilder('enrollment')` con `leftJoi
 ## Pruebas Automatizadas
 
 ```bash
-# Tests unitarios (9 pruebas)
+# Tests unitarios (18 pruebas, sin PostgreSQL ni red)
 npm test
 
-# Tests de integración E2E (141 pruebas E2E en 6 suites)
+# Solo las pruebas de la regla de actualización de cursos
+npm test -- update-course
+
+# Cobertura de las pruebas unitarias
+npm test -- --coverage
+
+# Tests de integración E2E
 npm run test:e2e
 ```
+
+El proyecto usa **Vitest**, cuya API es equivalente a Jest (`vi.fn()` en lugar de `jest.fn()`).
+
+### Pruebas unitarias de la Semana 12
+
+| Archivo | Qué protege |
+| --- | --- |
+| `src/courses/application/update-course.use-case.spec.ts` | La regla de negocio de `UpdateCourseUseCase` con un repositorio simulado: docente propietario (éxito), curso inexistente, docente ajeno rechazado sin guardar, administrador, curso sin propietario, solicitud anónima y conservación de campos. |
+| `src/courses/courses.controller.spec.ts` | Que `CoursesController.update` delegue al caso de uso el id, el DTO y la identidad autenticada, y que propague los errores en lugar de convertirlos en una respuesta exitosa. |
+
+Las pruebas siguen Arrange-Act-Assert y usan `Test.createTestingModule` con dobles controlados (`{ provide: COURSE_REPOSITORY, useValue: courses }`), así que no abren conexiones ni dependen de datos previos.
 
 
 ## Verificación de la segunda etapa del 11 de octubre de 2026

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { Actor } from '../../auth/decorators/current-user.decorator.js';
 import { Role } from '../../users/enums/role.enum.js';
 import {
   CourseNotFoundError,
@@ -10,11 +11,7 @@ import {
 } from '../domain/course-repository.port.js';
 import type { Course } from '../entities/course.entity.js';
 
-export interface UpdateCourseCommand {
-  courseId: number;
-  changes: Partial<Pick<Course, 'title' | 'level'>>;
-  actor?: { id: number; role: Role } | null;
-}
+export type UpdateCourseChanges = Partial<Pick<Course, 'title' | 'level'>>;
 
 /**
  * Caso de uso: actualizar un curso.
@@ -28,7 +25,11 @@ export class UpdateCourseUseCase {
     private readonly courses: CourseRepository,
   ) {}
 
-  async execute({ courseId, changes, actor }: UpdateCourseCommand): Promise<Course> {
+  async execute(
+    courseId: number,
+    changes: UpdateCourseChanges,
+    actor?: Actor | null,
+  ): Promise<Course> {
     const course = await this.courses.findById(courseId);
     if (!course) {
       throw new CourseNotFoundError(courseId);
