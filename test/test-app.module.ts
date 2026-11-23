@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AdminModule } from '../src/admin/admin.module.js';
 import { AppController } from '../src/app.controller.js';
 import { AppService } from '../src/app.service.js';
 import { AuthModule } from '../src/auth/auth.module.js';
@@ -33,9 +35,17 @@ import { WelcomeService } from '../src/welcome.service.js';
         () => ({
           JWT_SECRET: 'test_jwt_secret_key_for_testing_purposes',
           JWT_EXPIRES_IN: '1h',
+          CORS_ORIGINS: 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000',
         }),
       ],
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     TypeOrmModule.forRoot({
       type: 'sqljs',
       database: new Uint8Array(),
@@ -52,6 +62,7 @@ import { WelcomeService } from '../src/welcome.service.js';
     AuthModule,
     CategoriesModule,
     LoansModule,
+    AdminModule,
   ],
   controllers: [AppController, WelcomeController],
   providers: [AppService, WelcomeService],

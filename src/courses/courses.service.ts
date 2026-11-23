@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Role } from '../users/enums/role.enum.js';
+import { User } from '../users/entities/user.entity.js';
 import { CoursesQueryDto } from './dto/courses-query.dto.js';
 import { CreateCourseDto } from './dto/create-course.dto.js';
 import { UpdateCourseDto } from './dto/update-course.dto.js';
@@ -53,8 +59,22 @@ export class CoursesService {
     return this.coursesRepository.save(course);
   }
 
-  async update(id: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
+  async update(
+    id: string,
+    updateCourseDto: UpdateCourseDto,
+    currentUser?: User | null,
+  ): Promise<Course> {
     const course = await this.findOne(id);
+
+    // Regla de propiedad: un docente no modifica el curso de otro docente
+    if (currentUser && currentUser.role === Role.TEACHER) {
+      if (course.teacherId && course.teacherId !== currentUser.id) {
+        throw new ForbiddenException(
+          `Acceso denegado: un docente no puede modificar el curso perteneciente a otro docente (docente propietario ID ${course.teacherId})`,
+        );
+      }
+    }
+
     Object.assign(course, updateCourseDto);
     return this.coursesRepository.save(course);
   }

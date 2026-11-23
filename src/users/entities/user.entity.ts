@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Role } from '../enums/role.enum.js';
 
 @Entity('users')
 export class User {
@@ -16,6 +17,12 @@ export class User {
 
   @Column({ name: 'password_hash', select: false })
   passwordHash: string;
+
+  @Column({
+    type: 'varchar',
+    default: Role.USER,
+  })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

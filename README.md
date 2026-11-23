@@ -367,3 +367,45 @@ Datos conservados en la base local `coursehub`: categoría 1, libros 1, 2 y 3, p
 El puerto local de PostgreSQL usado en esta revisión fue 5433; adaptar `.env` a cada equipo. El ejemplo 5432 es el puerto estándar.
 
 El registro público fija el rol `user` y rechaza `role` en el DTO. `JWT_SECRET` es obligatorio; definir un valor privado en `.env`. Nunca publicar el secreto ni el token completo en las capturas.
+
+---
+
+## Autorización y Defensa en Profundidad
+
+La API implementa una arquitectura de seguridad por capas conforme al principio de defensa en profundidad:
+
+### 1. Control de Acceso Basado en Roles (RBAC) y Principio de Menor Privilegio
+- La entidad `User` implementa un rol controlado tipificado (`Role`: `user`, `teacher`, `admin`).
+- Todo registro público (`POST /auth/register`) asigna automáticamente el rol `user` (el rol con menor privilegio). El DTO de registro rechaza cualquier propiedad adicional como `role`.
+- La información de rol viaja en los claims firmados del JWT (`payload.role`) y se valida contra la base de datos al autenticar.
+
+### 2. Rutas Administrativas Exclusivas y Protección de Roles
+- Endpoints exclusivos de administración (`/admin/dashboard`, `/admin/users`) protegidos en cadena con `JwtAuthGuard` y `RolesGuard` mediante el decorador `@Roles(Role.ADMIN)`.
+- Si un usuario no envía token o el token es inválido, recibe `401 Unauthorized`.
+- Si un usuario envía un token válido pero carece del rol administrativo requerido (por ejemplo, rol `user` o `teacher`), el sistema bloquea el acceso inmediatamente con código **`403 Forbidden`**.
+
+### 3. Regla de Propiedad en Actualización (Ownership Enforcement)
+- En la operación de actualización de cursos (`PATCH /courses/:id`), se aplica control de acceso a nivel de dominio/recurso:
+  - Un docente (`Role.TEACHER`) **únicamente puede modificar los cursos de los que es propietario** (`course.teacherId === currentUser.id`).
+  - Si un docente intenta modificar el curso asignado a otro docente, el servicio arroja una excepción con código **`403 Forbidden`** indicando que un docente no modifica el curso de otro docente.
+  - Los administradores (`Role.ADMIN`) conservan privilegios para actualizar cualquier curso.
+
+### 4. Política CORS Restringida por Entorno
+- La API no admite comodines permisivos (`*`) con credenciales.
+- Se lee la variable `CORS_ORIGINS` para admitir exclusivamente los orígenes documentados:
+  - **Desarrollo:** `http://localhost:3000`, `http://localhost:5173`, `http://127.0.0.1:3000`.
+  - **Producción:** Dominios web oficiales declarados para el despliegue.
+- Peticiones con orígenes no autorizados son rechazadas en el preflight/handshake de CORS.
+
+### 5. Limitación de Solicitudes y Mitigación de Fuerza Bruta (Rate Limiting)
+- El endpoint `POST /auth/login` cuenta con protección activa mediante `@nestjs/throttler` (`ThrottlerGuard`).
+- Limita ráfagas e intentos sucesivos de inicio de sesión (5 solicitudes por minuto por IP/cliente).
+- Al superar la cuota permitida, la API responde de forma automática e inmutable con código HTTP **`429 Too Many Requests`**.
+
+### 6. Requisito Mandatario de Producción: HTTPS / TLS
+> [!IMPORTANT]
+> **DECLARACIÓN OBLIGATORIA DE SEGURIDAD PARA PRODUCCIÓN:**
+> En cualquier despliegue hacia entornos de preproducción o producción, **es estrictamente obligatorio el uso de HTTPS / TLS (Transport Layer Security versión 1.2 o superior)**.
+> - Todo el tráfico HTTP no cifrado debe ser redirigido forzosamente a HTTPS (código 301 Permanent Redirect) o terminado mediante un Reverse Proxy seguro (Nginx, Traefik, Caddy, Cloudflare o un Application Load Balancer).
+> - Se debe emplear un certificado SSL/TLS válido y confiable (emitido por Let's Encrypt o una Autoridad de Certificación reconocida).
+> - Esta medida es un requisito fundamental e indispensable para garantizar la confidencialidad de las credenciales en tránsito, evitar ataques de interceptación (Man-in-the-Middle o sniffing) y proteger los encabezados `Authorization: Bearer <token>` de sesión.

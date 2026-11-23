@@ -222,19 +222,30 @@ describe('CourseHub API (persistencia con SQLite en memoria)', () => {
         message: `Course with id ${id} not found`,
         error: 'Not Found',
       };
-      await request(app.getHttpServer())
+      // Forma consistente del filtro global: incluye path y timestamp
+      const res1 = await request(app.getHttpServer())
         .get(`/courses/${id}`)
-        .expect(404)
-        .expect(expected);
-      await request(app.getHttpServer())
+        .expect(404);
+      expect(res1.body).toMatchObject({ ...expected, path: `/courses/${id}` });
+      expect(typeof res1.body.timestamp).toBe('string');
+      expect(res1.body.stack).toBeUndefined();
+
+      // PATCH usa ParseIntPipe: un id no numérico es 400, uno numérico ausente 404
+      const patch = await request(app.getHttpServer())
         .patch(`/courses/${id}`)
-        .send({ level: 'advanced' })
-        .expect(404)
-        .expect(expected);
-      await request(app.getHttpServer())
+        .send({ level: 'advanced' });
+      if (/^\d+$/.test(id)) {
+        expect(patch.status).toBe(404);
+        expect(patch.body).toMatchObject(expected);
+      } else {
+        expect(patch.status).toBe(400);
+        expect(patch.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+      }
+
+      const res3 = await request(app.getHttpServer())
         .delete(`/courses/${id}`)
-        .expect(404)
-        .expect(expected);
+        .expect(404);
+      expect(res3.body).toMatchObject(expected);
       const resCourses = await request(app.getHttpServer())
         .get('/courses')
         .expect(200);

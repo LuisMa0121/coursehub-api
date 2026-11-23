@@ -10,4 +10,7 @@ export class Course {
 
   @Column()
   level: string;
+
+  @Column({ nullable: true })
+  teacherId?: number;
 }
