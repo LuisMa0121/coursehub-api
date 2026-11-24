@@ -31,6 +31,8 @@ import { WelcomeService } from '../src/welcome.service.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // Sin .env: las pruebas nunca leen credenciales reales.
+      ignoreEnvFile: true,
       load: [
         () => ({
           JWT_SECRET: 'test_jwt_secret_key_for_testing_purposes',

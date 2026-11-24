@@ -192,7 +192,7 @@ describe('Autorización y Defensa en Profundidad (6 Reglas de Seguridad)', () =>
         .send({ title: 'Intento de Sabotaje de Curso' })
         .expect(403);
 
-      expect(res.body.message).toMatch(/un docente no puede modificar el curso/);
+      expect(res.body.message).toMatch(/solo puede modificar sus propios cursos/);
     });
   });
 
